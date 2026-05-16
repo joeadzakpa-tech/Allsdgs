@@ -5,37 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F2EBDC">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Alliance For SDGs Network</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<!-- Fonts: load via Google Fonts stylesheet so URLs stay current (hot-linked .woff2 URLs rotate and 404) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="https://fonts.gstatic.com/s/instrumentserif/v4/jizDREVItHgc8qDIbSTKq4XIRgi-W8VAa9SPiQ.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@200..800&display=swap">
 <!-- Chart.js loaded lazily inside initDashboard() — see bottom of file -->
 
 <style>
-  /* ---------------- FONTS (self-declared to avoid CORS on Google's stylesheet) ---------------- */
-  @font-face {
-    font-family: 'Instrument Serif';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/instrumentserif/v4/jizDREVItHgc8qDIbSTKq4XIRgi-W8VAa9SPiQ.woff2) format('woff2');
-  }
-  @font-face {
-    font-family: 'Instrument Serif';
-    font-style: italic;
-    font-weight: 400;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/instrumentserif/v4/jizBREVItHgc8qDIbSTKq4XIRgiTHCNxRSxYOQ.woff2) format('woff2');
-  }
-  @font-face {
-    font-family: 'Manrope';
-    font-style: normal;
-    font-weight: 200 800;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
-  }
-
   :root {
     --bg: #F2EBDC;
     --bg-warm: #EAE0CC;
@@ -3522,7 +3509,7 @@
         <button class="custom" data-amt="custom">Other amount</button>
       </div>
       <div class="custom-amount" id="customAmtWrap">
-        <input type="number" id="customAmtInput" min="10" max="100000" step="10" placeholder="Enter amount">
+        <input type="number" id="customAmtInput" name="customAmount" min="10" max="100000" step="10" placeholder="Enter amount" aria-label="Custom donation amount">
       </div>
       <div style="text-align:center; font-size:0.82rem; color:var(--muted); margin-top:0.75rem" id="amtImpact">Funds 25 free health screenings</div>
       <div style="text-align:center; margin-top:1.5rem">
@@ -3681,16 +3668,16 @@
     <div class="contact-grid">
       <form id="contactForm" onsubmit="event.preventDefault(); alert('Thank you. We will reply within 3 working days.'); this.reset();">
         <div class="form-row">
-          <label>Your name</label>
-          <input type="text" required placeholder="Akosua Mensah">
+          <label for="contact-name">Your name</label>
+          <input type="text" id="contact-name" name="name" required placeholder="Akosua Mensah" autocomplete="name">
         </div>
         <div class="form-row">
-          <label>Email</label>
-          <input type="email" required placeholder="you@email.com">
+          <label for="contact-email">Email</label>
+          <input type="email" id="contact-email" name="email" required placeholder="you@email.com" autocomplete="email">
         </div>
         <div class="form-row">
-          <label>I'm getting in touch about</label>
-          <select required>
+          <label for="contact-topic">I'm getting in touch about</label>
+          <select id="contact-topic" name="topic" required>
             <option value="">Select an option…</option>
             <option>Partnership opportunity</option>
             <option>Volunteering or fellowship</option>
@@ -3701,8 +3688,8 @@
           </select>
         </div>
         <div class="form-row">
-          <label>Message</label>
-          <textarea required placeholder="Tell us what's on your mind…"></textarea>
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" name="message" required placeholder="Tell us what's on your mind…"></textarea>
         </div>
         <button type="submit" class="btn lg">Send message</button>
       </form>
