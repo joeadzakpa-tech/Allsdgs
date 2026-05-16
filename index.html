@@ -8,7 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Alliance For SDGs Network</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="preload" href="https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://fonts.gstatic.com/s/instrumentserif/v4/jizDREVItHgc8qDIbSTKq4XIRgi-W8VAa9SPiQ.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Chart.js loaded lazily inside initDashboard() — see bottom of file -->
+
 <style>
   /* ---------------- FONTS (self-declared to avoid CORS on Google's stylesheet) ---------------- */
   @font-face {
@@ -28,35 +31,7 @@
   @font-face {
     font-family: 'Manrope';
     font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
-  }
-  @font-face {
-    font-family: 'Manrope';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
-  }
-  @font-face {
-    font-family: 'Manrope';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
-  }
-  @font-face {
-    font-family: 'Manrope';
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
-  }
-  @font-face {
-    font-family: 'Manrope';
-    font-style: normal;
-    font-weight: 800;
+    font-weight: 200 800;
     font-display: swap;
     src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
   }
@@ -2389,7 +2364,7 @@
       <div class="section-head">
         <span class="eyebrow">Signals from the field</span>
         <h2 class="serif">The work, <span class="em">in motion this week.</span></h2>
-        <p>Three short updates from our active programmes — and what a partner told us this month.</p>
+        <p>Three short updates from our active programmes.</p>
       </div>
       <div class="signals-grid">
         <div class="signals-stack">
@@ -2418,14 +2393,6 @@
             <span class="signal-meta">Screening Caravan · 10 May</span>
           </div>
         </div>
-        <blockquote class="signal-voice">
-          <div class="signal-voice-eyebrow">A partner's note</div>
-          <p>They show up. Eight years ago, ten years ago — same coordinator on the same WhatsApp, asking the same patient questions. That continuity is rare.</p>
-          <footer>
-            <strong>District Chief Executive</strong>
-            <span>Central Region · partnership review, 2025</span>
-          </footer>
-        </blockquote>
       </div>
     </section>
     <style>
@@ -2545,15 +2512,6 @@
         .signal-voice p { font-size: 1.15rem; }
       }
     </style>
-
-    <div class="cta-banner">
-      <h3 class="serif">Stay close to the work.</h3>
-      <p>One email a month. Programme updates from the field, the data behind our decisions, and ways to get involved.</p>
-      <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('input').value=''; alert('Thank you. Look out for our next dispatch.');">
-        <input type="email" placeholder="your.email@example.com" required>
-        <button type="submit" class="btn">Subscribe</button>
-      </form>
-    </div>
 
   </div>
 </section>
@@ -4748,7 +4706,20 @@ document.body.addEventListener('click', (e) => {
 /* ============ DASHBOARD ============ */
 let dashInited = false; let charts = {};
 function initDashboard() {
-  if (dashInited) return; dashInited = true;
+  if (dashInited) return;
+
+  // Lazy-load Chart.js on first visit to the Impact page.
+  // Keeps ~200KB off the critical path for visitors who never open this tab.
+  if (typeof Chart === 'undefined') {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
+    s.onload = initDashboard;
+    s.onerror = () => console.warn('Chart.js failed to load — dashboard charts unavailable.');
+    document.head.appendChild(s);
+    return;
+  }
+
+  dashInited = true;
   const muted = '#847559', line = 'rgba(44, 36, 24, 0.08)';
   Chart.defaults.font.family = "'Manrope', sans-serif";
   Chart.defaults.color = muted;
