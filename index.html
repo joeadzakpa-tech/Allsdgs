@@ -5,24 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F2EBDC">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Alliance For SDGs Network</title>
-
-<!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-
-<!-- Fonts: load via Google Fonts stylesheet so URLs stay current (hot-linked .woff2 URLs rotate and 404) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@200..800&display=swap">
-<!-- Chart.js loaded lazily inside initDashboard() — see bottom of file -->
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
+  /* ---------------- FONTS (self-declared to avoid CORS on Google's stylesheet) ---------------- */
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/instrumentserif/v4/jizDREVItHgc8qDIbSTKq4XIRgi-W8VAa9SPiQ.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Instrument Serif';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/instrumentserif/v4/jizBREVItHgc8qDIbSTKq4XIRgiTHCNxRSxYOQ.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/manrope/v15/xn7gYHE41ni1AdIRggOxSvfedN62Zw.woff2) format('woff2');
+  }
+
   :root {
     --bg: #F2EBDC;
     --bg-warm: #EAE0CC;
@@ -390,7 +428,7 @@
     margin-bottom: 1.5rem; position: sticky; top: 80px; z-index: 50;
   }
   .dd-wrap { flex: 1; min-width: 180px; }
-  .dd-wrap > label, .dd-wrap > .dd-label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; font-weight: 600; }
+  .dd-wrap > label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; font-weight: 600; }
   .dd-custom { position: relative; }
   .dd-btn {
     width: 100%; padding: 0.75rem 1rem; border-radius: 12px;
@@ -1613,7 +1651,7 @@
     /* Filter row */
     .filter-row { padding: 1rem; gap: 0.55rem; border-radius: 14px; margin-bottom: 1.25rem; }
     .dd-wrap { flex: 1 1 calc(50% - 0.3rem); min-width: 0; }
-    .dd-wrap > label, .dd-wrap > .dd-label { font-size: 0.65rem; margin-bottom: 0.3rem; }
+    .dd-wrap > label { font-size: 0.65rem; margin-bottom: 0.3rem; }
     .dd-btn { padding: 0.7rem 0.85rem; font-size: 0.84rem; }
     .dd-menu button { padding: 0.55rem 0.7rem; font-size: 0.82rem; }
     .dd-reset { flex: 1 1 100%; padding: 0.7rem 1rem; font-size: 0.85rem; }
@@ -2128,6 +2166,118 @@
     .impact-hero h1 { font-size: 1.55rem; }
   }
 
+  /* ============================================================
+     MOBILE FIX · Programme stages + Department directory grids
+     Both use grid-template-columns: 80px 1fr auto (or auto 1fr auto)
+     which overflows on narrow phones. Stack them on small screens.
+     ============================================================ */
+  @media (max-width: 700px) {
+    /* "How a programme begins" — 5-stage list */
+    #page-programmes .block > div[style*="max-width:920px"] > div {
+      grid-template-columns: auto 1fr !important;
+      grid-template-rows: auto auto !important;
+      row-gap: 0.65rem !important;
+      column-gap: 1rem !important;
+      padding: 1.25rem 1.35rem !important;
+    }
+    #page-programmes .block > div[style*="max-width:920px"] > div > div:first-child {
+      font-size: 2.2rem !important;
+      grid-row: 1 !important;
+      grid-column: 1 !important;
+      align-self: center;
+    }
+    #page-programmes .block > div[style*="max-width:920px"] > div > div:nth-child(2) {
+      grid-row: 1 !important;
+      grid-column: 2 !important;
+    }
+    #page-programmes .block > div[style*="max-width:920px"] > div > div:nth-child(2) h4 {
+      font-size: 1rem !important;
+      margin-bottom: 0.25rem !important;
+    }
+    #page-programmes .block > div[style*="max-width:920px"] > div > div:nth-child(2) p {
+      font-size: 0.86rem !important;
+      line-height: 1.5 !important;
+    }
+    /* Duration meta moves below, full width, flush left */
+    #page-programmes .block > div[style*="max-width:920px"] > div > div:nth-child(3) {
+      grid-row: 2 !important;
+      grid-column: 1 / -1 !important;
+      text-align: left !important;
+      padding-top: 0.65rem !important;
+      border-top: 1px dashed var(--line);
+      font-size: 0.7rem !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: baseline !important;
+      gap: 0.55rem !important;
+    }
+    #page-programmes .block > div[style*="max-width:920px"] > div > div:nth-child(3) br {
+      display: none;
+    }
+    #page-programmes .block > div[style*="max-width:920px"] > div > div:nth-child(3) span {
+      font-size: 0.92rem !important;
+    }
+
+    /* Department directory on Contact page */
+    #page-contact .block > div[style*="max-width:880px"] > div {
+      grid-template-columns: auto 1fr !important;
+      grid-template-rows: auto auto !important;
+      row-gap: 0.65rem !important;
+      column-gap: 0.85rem !important;
+      padding: 1.25rem 1.35rem !important;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:first-child {
+      grid-row: 1 !important;
+      grid-column: 1 !important;
+      width: 40px !important;
+      height: 40px !important;
+      align-self: center;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:first-child svg {
+      width: 18px !important;
+      height: 18px !important;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:nth-child(2) {
+      grid-row: 1 !important;
+      grid-column: 2 !important;
+      min-width: 0;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:nth-child(2) > div:first-child {
+      font-size: 0.9rem !important;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:nth-child(2) a {
+      font-size: 0.78rem !important;
+      word-break: break-all;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:nth-child(2) > div:last-child {
+      font-size: 0.76rem !important;
+      margin-top: 0.3rem !important;
+    }
+    /* Reply-window pill moves below, full width */
+    #page-contact .block > div[style*="max-width:880px"] > div > div:nth-child(3) {
+      grid-row: 2 !important;
+      grid-column: 1 / -1 !important;
+      text-align: left !important;
+      padding-top: 0.6rem !important;
+      border-top: 1px dashed var(--line);
+      font-size: 0.7rem !important;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: baseline !important;
+      gap: 0.55rem !important;
+    }
+    /* Dark-themed "General enquiries" row */
+    #page-contact .block > div[style*="max-width:880px"] > div[style*="background:var(--ink)"] > div:nth-child(3) {
+      border-top-color: rgba(251, 246, 235, 0.16) !important;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:nth-child(3) br {
+      display: none;
+    }
+    #page-contact .block > div[style*="max-width:880px"] > div > div:nth-child(3) strong {
+      font-size: 0.92rem !important;
+    }
+  }
+
   /* Touch-device specific (hover-incapable) */
   @media (hover: none) and (pointer: coarse) {
     /* Disable hover transforms on touch so nothing gets stuck mid-animation */
@@ -2249,7 +2399,7 @@
 <header class="site">
   <div class="container nav-row">
     <a class="brand" data-page="home">
-      <svg class="logo-svg"><use href="#logo-mark"/></svg>
+      <svg class="logo-svg"><use href="#logo-original"/></svg>
       <div class="name">
         <strong>Alliance For SDGs</strong>
         <span>Network</span>
@@ -2304,22 +2454,22 @@
     <div class="hero">
       <div class="slides" id="heroSlides">
         <div class="slide slide-1 active">
-          <span class="eyebrow">A coalition for the 2030 agenda</span>
-          <h2 class="serif">Seventeen goals. <span class="em">One Ghana,</span> indivisible.</h2>
-          <p>The Goals are not seventeen abstractions. They are seventeen specific demands made on specific districts, in specific decades. The work of advancing them is mostly the work of keeping faith with what one community asked for, then the next.</p>
-          <div><a class="btn lg" data-page="goals">Explore the Goals</a></div>
+          <span class="eyebrow">10 March 2018 · Mfantsipim School</span>
+          <h2 class="serif">When the First Lady <span class="em">opened our doors.</span></h2>
+          <p>H.E. Rebecca Akufo-Addo, First Lady of the Republic of Ghana, joined us as Special Guest of Honour at the Ghana International Youth Summit on Sustainable Development — convened by the Alliance with UNICEF Ghana, UNDP Ghana, USAID and the UN Information Centre. One of three anchor convenings in our founding decade.</p>
+          <div><a class="btn lg" data-page="about" data-anchor="timeline">See the timeline</a></div>
         </div>
         <div class="slide slide-2">
-          <span class="eyebrow">Programmes in motion</span>
-          <h2 class="serif">Reached <span class="em">2.5 million.</span> Treated plainly.</h2>
-          <p>Eight years of showing up across Ghana, Côte d'Ivoire and Singapore. The number is real. What it does not capture is the patience of the partners who made each conversation possible.</p>
+          <span class="eyebrow">23 May 2018 · Kofi Annan ICT Centre, Accra</span>
+          <h2 class="serif">A National Dialogue on <span class="em">the seventeen Goals.</span></h2>
+          <p>The Alliance co-convened Ghana's multi-stakeholder dialogue on the role of data, technology and innovation in achieving Agenda 2030 — with the Ministry of Planning, the Ghana Statistical Service, ISSER, the SDG Civil Society Platform Ghana and GIZ. The next iteration is planned for 2026.</p>
           <div><a class="btn lg" data-page="programmes">See programmes</a></div>
         </div>
         <div class="slide slide-3">
-          <span class="eyebrow">Live impact dashboard</span>
-          <h2 class="serif">The whole record, <span class="em">honestly counted.</span></h2>
-          <p>Every figure verified by attendance records, partner attestations, and an independent annual audit — including a section, kept openly, on what we got wrong.</p>
-          <div><a class="btn lg" data-page="impact">Open dashboard</a></div>
+          <span class="eyebrow">27 November 2017 · Abidjan</span>
+          <h2 class="serif">A coalition <span class="em">beyond Ghana's borders.</span></h2>
+          <p>Two weeks after our incorporation in Accra, the Alliance delegation arrived in Côte d'Ivoire — engaging Aide Pur, AIESEC Abidjan, and receiving the Tunza Eco-Generation Regional Ambassadorship at Université Félix Houphouët-Boigny. Registered with the Registrar General's Department of Ghana since 7 November 2017 · Reg. No. CG111722017.</p>
+          <div><a class="btn lg" data-page="impact">See our record</a></div>
         </div>
       </div>
       <div class="slide-dots" id="slideDots"></div>
@@ -2335,51 +2485,59 @@
 
     <section class="block">
       <div class="section-head">
-        <span class="eyebrow">By the numbers</span>
+        <span class="eyebrow">By the numbers · honestly counted</span>
         <h2 class="serif">A coalition <span class="em">measured in lives.</span></h2>
-        <p>Eight years of organising, training and advocacy across three countries.</p>
+        <p>Ten years of organising, training and advocacy across three countries. We distinguish direct engagement (verified by attendance and partner co-branding) from broadcast reach (audience estimates). Both matter — they are not the same.</p>
       </div>
-      <div class="stats">
-        <div class="stat" data-page="impact"><div class="num" data-count="2500000">0</div><div class="lbl">People engaged through campaigns and direct programming</div></div>
-        <div class="stat" data-page="programmes"><div class="num italic" data-count="110000">0</div><div class="lbl">Direct-programme participants, verified by attendance and partner attestation</div></div>
-        <div class="stat" data-page="goals"><div class="num italic" data-count="10">0</div><div class="lbl">of 17 Goals with an active programme behind them</div></div>
-        <div class="stat" data-page="about"><div class="num" data-count="14">0</div><div class="lbl">Districts engaged across three countries</div></div>
-      </div>
+    <div class="stats">
+      <div class="stat" data-page="impact"><div class="num" data-count="3000">0</div><div class="lbl"><strong style="color:var(--ink); display:block; margin-bottom:0.15rem">Direct engagement</strong>Senior high school students &amp; young people across documented programmes since 2016</div></div>
+      <div class="stat" data-page="programmes"><div class="num italic" data-count="4">0</div><div class="lbl"><strong style="color:var(--ink); display:block; margin-bottom:0.15rem">Active pillars</strong>Thematic areas in delivery across our documented partner network</div></div>
+      <div class="stat" data-page="programmes"><div class="num italic" data-count="3">0</div><div class="lbl"><strong style="color:var(--ink); display:block; margin-bottom:0.15rem">Countries</strong>Documented engagement: Ghana, Côte d'Ivoire, Singapore</div></div>
+      <div class="stat" data-page="about"><div class="num" data-count="25">0</div><div class="lbl"><strong style="color:var(--ink); display:block; margin-bottom:0.15rem">Institutional partners</strong>Documented across our work since 2016 — a coalition built one relationship at a time</div></div>
+    </div>
     </section>
 
     <section class="block">
       <div class="section-head">
         <span class="eyebrow">Signals from the field</span>
         <h2 class="serif">The work, <span class="em">in motion this week.</span></h2>
-        <p>Three short updates from our active programmes.</p>
+        <p>Three short updates from our active programmes — and what a partner told us this month.</p>
       </div>
       <div class="signals-grid">
         <div class="signals-stack">
           <div class="signal-card">
             <div class="signal-tag" style="color:var(--accent-deep)">
               <span class="signal-dot" style="background:var(--accent); box-shadow:0 0 8px var(--accent)"></span>
-              Live · Ahanta West
+              Recurring · Annual
             </div>
-            <p>Phase-two mangrove planting begins Monday — 38 more hectares, three more communities.</p>
-            <span class="signal-meta">Coastal Resilience · 12 May</span>
+            <p>Annual World Oceans Day (8 June) and Tree Planting Day — continuing in 2026.</p>
+            <span class="signal-meta">Climate &amp; Environment · since 2018</span>
           </div>
           <div class="signal-card">
             <div class="signal-tag" style="color:#5C6E3A">
               <span class="signal-dot" style="background:#8A9967"></span>
-              Cohort open
+              In planning
             </div>
-            <p>She Leads cohort 5 closes applications on the 28th. 412 have applied, 92 places.</p>
-            <span class="signal-meta">She Leads · 09 May</span>
+            <p>National Dialogue on the SDGs 2026 — Kofi Annan ICT Centre, Accra.</p>
+            <span class="signal-meta">Multi-stakeholder convening · planned</span>
           </div>
           <div class="signal-card">
             <div class="signal-tag" style="color:#3A5A6A">
               <span class="signal-dot" style="background:#5A8A9A"></span>
-              Caravan
+              ECOSOC pathway
             </div>
-            <p>Saturday's screening at Apam covered 318 people. 47 referrals, 4 urgent.</p>
-            <span class="signal-meta">Screening Caravan · 10 May</span>
+            <p>The Alliance is preparing its application for ECOSOC Consultative Status, 2026.</p>
+            <span class="signal-meta">UN engagement · in progress</span>
           </div>
         </div>
+        <blockquote class="signal-voice">
+          <div class="signal-voice-eyebrow">From our public record</div>
+          <p>Students from Mfantsipim School, days after our Sustainable Development Awareness Campaign session, formed the Climate Action Club to tackle SDG 13. The club is officially recognised by the school.</p>
+          <footer>
+            <strong>SDAC outcome · 2018–2019</strong>
+            <span>Mfantsipim School Auditorium, Cape Coast · with World Merit Ghana</span>
+          </footer>
+        </blockquote>
       </div>
     </section>
     <style>
@@ -2500,6 +2658,15 @@
       }
     </style>
 
+    <div class="cta-banner">
+      <h3 class="serif">Stay close to the work.</h3>
+      <p>One email a month. Programme updates from the field, the data behind our decisions, and ways to get involved.</p>
+      <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('input').value=''; alert('Thank you. Look out for our next dispatch.');">
+        <input type="email" placeholder="your.email@example.com" required>
+        <button type="submit" class="btn">Subscribe</button>
+      </form>
+    </div>
+
   </div>
 </section>
 
@@ -2509,7 +2676,7 @@
     <div class="section-head" id="aboutPageHeader">
       <span class="eyebrow">Our story</span>
       <h2 class="serif">A coalition <span class="em">for the seventeen Goals.</span></h2>
-      <p>The Alliance For SDGs Network is a coalition of researchers, policymakers, academics and think tanks — convened in 2017 around a single conviction: that the seventeen Sustainable Development Goals are indivisible, and that progress on any one of them is best made in concert with the rest. Eight years on, we are a working partnership of practitioners and institutions translating that conviction into measurable district-level action across Ghana, Côte d'Ivoire and Singapore.</p>
+      <p>The Alliance For SDGs Network began work in 2016, formally incorporated as a Company Limited by Guarantee in Ghana on 7 November 2017 (Registrar General's Department, Republic of Ghana; Registration No. CG111722017; Companies Act 1963, Act 179). We are a coalition of young people, educators and technologists; researchers, academics and policy makers; volunteers, advocates and civil society actors; alongside programme officers and partner organisations — advancing the seventeen United Nations Sustainable Development Goals through awareness work, multi-stakeholder convening, and partnership-based programme delivery in Ghana and, where opportunities arise, beyond.</p>
     </div>
 
     <!-- ============== ABOUT — TABBED PANELS (navigation lives in the header dropdown) ============== -->
@@ -2524,18 +2691,18 @@
         <div class="prog-grid">
           <article class="prog-card">
             <span class="badge" style="background:rgba(200,98,58,0.14); color:var(--accent-deep)">Mission</span>
-            <h3 class="serif">To accelerate the seventeen Goals through community-led action</h3>
-            <p>We design, deliver and measure programmes that translate the Sustainable Development Goals into tangible improvements in everyday Ghanaian lives — and we share what we learn with the wider development community.</p>
+            <h3 class="serif">To advance the seventeen Goals through awareness, convening and youth-led action</h3>
+            <p>We work in close partnership with district assemblies, community-based organisations, schools and youth networks to design and deliver programmes that move all seventeen Goals forward at once — because the Goals were never meant to be chosen between.</p>
           </article>
           <article class="prog-card">
             <span class="badge" style="background:rgba(58,90,106,0.14); color:#3A5A6A">Vision</span>
-            <h3 class="serif">A Ghana — and a world — where no Goal is left behind</h3>
-            <p>We envisage a 2030 in which the indivisibility of the Goals is reflected in policy, budget and practice; where progress on climate is not bought with regress on equality, and where prosperity is shared.</p>
+            <h3 class="serif">A Ghana — and a world — where the Goals are everyday knowledge</h3>
+            <p>We envisage a 2030 in which the seventeen Sustainable Development Goals are not the language of conference rooms but the language of classrooms, technology hubs and community gatherings — owned by young people as their own agenda.</p>
           </article>
           <article class="prog-card">
             <span class="badge" style="background:rgba(92,110,58,0.14); color:#5C6E3A">Our promise</span>
-            <h3 class="serif">Show up, listen first, measure honestly</h3>
-            <p>We are accountable to the communities we serve before we are accountable to our donors. Every programme is co-designed with district stakeholders and reviewed annually with the people it touches.</p>
+            <h3 class="serif">Show up, partner well, count honestly</h3>
+            <p>We are a small coalition organisation. We do not claim more than we can document. We work through long-standing partnerships and publish our record openly — including this rewrite, which corrects earlier overstated figures to match what we can verify.</p>
           </article>
         </div>
 
@@ -2576,44 +2743,39 @@
         </div>
         <div class="timeline">
           <div class="tl-item">
+            <div class="yr">2016</div>
+            <h4>The work begins</h4>
+            <p>Early SDG awareness activity, including the August 2016 radio broadcast on Dynamite 88.9 FM, Tarkwa, reaching an estimated audience of 45,000 in the Western Region of Ghana on the United Nations Sustainable Development Goals.</p>
+          </div>
+          <div class="tl-item">
             <div class="yr">2017</div>
-            <h4>The Alliance is convened</h4>
-            <p>A small group of changemakers gathers in Accra. Good Deeds Day delivers 840 free health screenings — the first measurable footprint of what would become a coalition.</p>
+            <h4>SDG Info Session and SDGs Africa Tour Series</h4>
+            <p>SDG Info Session at EQWIP Hubs Accra (Labone, July 2017) in partnership with World Merit Ghana. The Alliance is formally incorporated as a Company Limited by Guarantee in Ghana on 7 November 2017 (Reg. No. CG111722017). Two weeks later, on 27 November, the Alliance delegation arrives in Abidjan, Côte d'Ivoire — visiting Aide Pur, AIESEC Abidjan and receiving the Tunza Eco-Generation Regional Ambassadorship at Université Félix Houphouët-Boigny.</p>
           </div>
           <div class="tl-item">
             <div class="yr">2018</div>
-            <h4>First district partnership · National Dialogue on the SDGs</h4>
-            <p>Formal collaboration with Gomoa East District Assembly opens our first sustained community presence outside Greater Accra. In March, we co-convene Ghana's first National Dialogue on the SDGs at the Kofi Annan ICT Centre.</p>
+            <h4>A year of convening</h4>
+            <p>January 2018: partnership with the SG4Diversity Inclusion Festival at National Junior College, Singapore. March: co-convening of the Ghana International Youth Summit on Sustainable Development at Mfantsipim School, with H.E. Rebecca Akufo-Addo, First Lady of Ghana, as Special Guest of Honour. May: co-convening of the National Dialogue on the SDGs at the Kofi Annan ICT Centre, Accra. Partnership with SAGE Ghana on the National High School Entrepreneurship Competition. September: 2018 partner of the Global People's Summit during the UN General Assembly week.</p>
           </div>
           <div class="tl-item">
             <div class="yr">2019</div>
-            <h4>Cross-border, for the first time</h4>
-            <p>An advocacy delegation to Côte d'Ivoire expands the coalition beyond Ghana, marking the start of our regional posture.</p>
+            <h4>Schools, health and technology</h4>
+            <p>Sustainable Development Awareness Campaign at Mfantsipim School Auditorium (31 March, 750 students). Mental Health Awareness and SDG 3 at Captains School on World Health Day weekend (7 April, 300 students, with Psychiatric Nurse Deborah Effah). SDGs and Internet of Things at the Accra Digital Centre / Ghana Tech Lab (27 April, 125 attendees, with Confidence Mawusi and the Internet of Things Network Hub).</p>
           </div>
           <div class="tl-item">
-            <div class="yr">2020</div>
-            <h4>Pandemic response and pivot</h4>
-            <p>COVID-19 forces a rethink. We launch remote training pipelines, digital advocacy and emergency PPE distribution across four districts.</p>
+            <div class="yr">2020–2024</div>
+            <h4>Pillar consolidation</h4>
+            <p>Continued school-based work including the SDGs Implementation Fair at Presbyterian Boys Senior High School (PRESEC), Legon. STEM and ICT programming at Abakrampa Senior High School and Apam Senior High School, with Impeedcraft Technosol Pvt Ltd. Advanced digital skills training (coding, augmented reality, machine learning, app development) for 25 senior high school students, with Techbooth. Annual World Oceans Day and Tree Planting Day events continue each year.</p>
           </div>
           <div class="tl-item">
-            <div class="yr">2022</div>
-            <h4>She Leads launches</h4>
-            <p>Our flagship gender-equality programme begins, with 60 inaugural fellows. Today, 320 women have come through the programme.</p>
-          </div>
-          <div class="tl-item">
-            <div class="yr">2023</div>
-            <h4>Crossing one million reached</h4>
-            <p>Cumulative reach passes the million mark. The Singapore advocacy partnership is signed, extending our footprint to a third country.</p>
-          </div>
-          <div class="tl-item">
-            <div class="yr">2024</div>
-            <h4>Coastal Resilience Initiative · public dashboard</h4>
-            <p>Mangrove restoration begins in Ahanta West with 84 hectares pledged in the first phase. Our impact dashboard goes public in October.</p>
+            <div class="yr">2025</div>
+            <h4>A documented record</h4>
+            <p>Cumulative receipts across the Alliance's eight years of operation amount to approximately GHS 1,945,650, of which the 2025 reporting year is the most recent annual cycle. The Alliance prepares its first application for ECOSOC Consultative Status with the United Nations.</p>
           </div>
           <div class="tl-item">
             <div class="yr">2026</div>
             <h4>Where we stand today</h4>
-            <p>2.5 million people reached, 12 active programmes, 14 districts engaged, 48 partner organisations. Three new districts under assessment for 2026–27.</p>
+            <p>Four thematic pillars — Youth Empowerment &amp; SDG Awareness; Health &amp; Wellbeing; Climate &amp; Environment; STEM &amp; Digital Skills — held together by a documented partner network of 25+ institutions. Three new convenings planned: the next National Dialogue on the SDGs, expansion of the SDAC into additional senior high schools, and the next Techbooth digital-skills cohort.</p>
           </div>
         </div>
       </div>
@@ -2628,108 +2790,123 @@
         <div class="team-grid">
           <div class="team-card" onclick="this.classList.toggle('flipped')">
             <div class="flip-inner">
-              <div class="team-front"><div class="name serif">Joshua K. Adzakpa</div><div class="role">Convenor &amp; Lead Analyst</div></div>
-              <div class="team-back"><p>Founding convenor of the Alliance. Associate Fellow of the Royal Commonwealth Society and UN Women He-for-She Champion. Two MSc degrees from the University of Ghana in Business Analytics and Sustainable Development.</p></div>
+              <div class="team-front"><div class="name serif">Joshua K. Adzakpa</div><div class="role">Convenor &amp; Executive Director</div></div>
+              <div class="team-back"><p>Founding Convenor of the Alliance For SDGs Network. Documented in our public record from incorporation (7 November 2017) and the November 2017 Abidjan delegation onwards. Two MSc degrees from the University of Ghana in Business Analytics and Sustainable Development &amp; Climate Change.</p></div>
             </div>
           </div>
           <div class="team-card" onclick="this.classList.toggle('flipped')">
             <div class="flip-inner">
               <div class="team-front t2"><div class="name serif">Prince Kwaku Yalley Abban</div><div class="role">Co-founder</div></div>
-              <div class="team-back"><p>Co-founder of the Alliance. A long-standing convener of community-led development work, with a particular focus on partnership-building and field operations across our district networks.</p></div>
+              <div class="team-back"><p>Co-founder of the Alliance. Documented in our public record from the November 2017 Abidjan delegation, and featured as a speaker at the December 2017 Accra convening on grassroots SDG ownership. Long-standing convener of community-led development work.</p></div>
             </div>
           </div>
           <div class="team-card" onclick="this.classList.toggle('flipped')">
             <div class="flip-inner">
               <div class="team-front t3"><div class="name serif">Maame Brago Nsiah</div><div class="role">Project Manager</div></div>
-              <div class="team-back"><p>Coordinates programme delivery across the Alliance's active portfolio, overseeing planning, monitoring and donor reporting from initiation through to close-out.</p></div>
+              <div class="team-back"><p>Coordinates programme delivery across the Alliance's active portfolio, overseeing planning, partner coordination and reporting across the four pillars — Youth Empowerment, Health, Climate, and STEM.</p></div>
             </div>
           </div>
           <div class="team-card" onclick="this.classList.toggle('flipped')">
             <div class="flip-inner">
-              <div class="team-front t4"><div class="name serif">Adjoa Boateng</div><div class="role">Equality &amp; Advocacy</div></div>
-              <div class="team-back"><p>Cohort 2022 fellow turned full-time staff. Coordinates campaigns on gender-responsive policy and reduced inequalities.</p></div>
+              <div class="team-front t4"><div class="name serif">Benneth Kojo Baah Sarfo Jnr</div><div class="role">Equality &amp; Advocacy Lead</div></div>
+              <div class="team-back"><p>Leads the Alliance's advocacy work on equality and social inclusion, with a focus on youth-led campaigns and cross-border partnership engagement across our documented work in Ghana, Côte d'Ivoire and Singapore.</p></div>
             </div>
           </div>
         </div>
 
         <div style="max-width: 720px; margin: 3.5rem auto 0; text-align: center; padding: 2rem; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 20px 20px 40px 20px">
-          <p style="font-family: 'Instrument Serif', serif; font-size: 1.25rem; line-height: 1.5; color: var(--ink); margin-bottom: 1.25rem; letter-spacing: -0.01em">Beyond this leadership circle, the Alliance is the work of dozens of fellows, community monitors, district coordinators and pro-bono volunteers. Their names fill our annual reports.</p>
-          <a class="btn ghost" data-page="contact">Apply to join the fellowship</a>
+          <p style="font-family: 'Instrument Serif', serif; font-size: 1.25rem; line-height: 1.5; color: var(--ink); margin-bottom: 1.25rem; letter-spacing: -0.01em">Alongside this leadership team, the Alliance has been built by fellows, programme leads and partner-organisation focal points — including Deborah Effah (Psychiatric Nurse, who led our 2019 Mental Health Awareness session at Captains School) and Confidence Mawusi (who led our 2019 SDGs and Internet of Things session at the Accra Digital Centre).</p>
+          <a class="btn ghost" data-page="contact">Get involved with the Alliance</a>
         </div>
 
-        <!-- PARTNERS -->
         <div class="section-head" style="margin-top: 5rem">
           <span class="eyebrow">Our partners</span>
           <h2 class="serif">No coalition works <span class="em">alone.</span></h2>
-          <p>Forty-eight partner organisations, public bodies and community institutions share the work with us. A selection of the collaborations that have shaped 2025 below.</p>
+          <p>Twenty-five-plus documented institutional partners share the work with us. Every name below is verifiable in our public record since 2016.</p>
         </div>
 
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.25rem; margin-bottom: 2.5rem">
-          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #5C6E3A">
-            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#5C6E3A; font-weight:700">Government &amp; public bodies</div>
-            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Ministries, agencies &amp; district assemblies</h4>
+          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #C8623A">
+            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--accent-deep); font-weight:700">Programme co-delivery</div>
+            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Our closest partners</h4>
             <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.88rem; color:var(--ink-2); line-height:1.5">
-              <li>· Ghana Health Service</li>
-              <li>· Ministry of Education</li>
-              <li>· Ghana Education Service</li>
-              <li>· EPA Ghana</li>
-              <li>· Forestry Commission</li>
-              <li>· Ghana Statistical Service</li>
-              <li>· Gomoa East District Assembly</li>
-              <li>· Ahanta West District Assembly</li>
+              <li>· World Merit Ghana (SDAC)</li>
+              <li>· Impeedcraft Technosol Pvt Ltd (STEM/ICT)</li>
+              <li>· Techbooth (digital skills)</li>
+              <li>· Internet of Things Network Hub</li>
+              <li>· SAGE Ghana (NHSEC, since 2018)</li>
+              <li>· League for Global Development</li>
+              <li>· High Schools Society</li>
+              <li>· EQWIP Hubs (Accra)</li>
             </ul>
           </div>
           <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #3A5A6A">
-            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#3A5A6A; font-weight:700">UN &amp; multilateral</div>
-            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">International institutions</h4>
+            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#3A5A6A; font-weight:700">UN-system &amp; international</div>
+            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Documented engagement</h4>
             <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.88rem; color:var(--ink-2); line-height:1.5">
-              <li>· UN Women Ghana</li>
-              <li>· UNICEF Ghana</li>
-              <li>· UNDP Accelerator Lab</li>
-              <li>· Royal Commonwealth Society</li>
-              <li>· Queen Elizabeth Diamond Jubilee Trust</li>
-              <li>· ECOWAS Commission</li>
+              <li>· UNICEF Ghana (2018 Youth Summit)</li>
+              <li>· UNDP Ghana (2018 Youth Summit)</li>
+              <li>· UN Information Centre (2018)</li>
+              <li>· USAID (2018 Youth Summit)</li>
+              <li>· United Nations Foundation (2018 GPS)</li>
+              <li>· SDG Action Campaign (2018 GPS)</li>
+              <li>· Humanity Lab Foundation (2018 GPS)</li>
+              <li>· GIZ (German Cooperation, 2018)</li>
+              <li>· G³ Geneva Global Goals Innovation Day</li>
             </ul>
           </div>
-          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #8B3A1F">
-            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#8B3A1F; font-weight:700">Academic &amp; research</div>
-            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Universities &amp; innovation hubs</h4>
+          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #5C6E3A">
+            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#5C6E3A; font-weight:700">Government &amp; convening</div>
+            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">2018 National Dialogue partners</h4>
             <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.88rem; color:var(--ink-2); line-height:1.5">
-              <li>· University of Ghana</li>
-              <li>· KNUST Innovation Hub</li>
-              <li>· Takoradi Technical University</li>
-              <li>· Ghana Medical Students Association</li>
-              <li>· Kofi Annan ICT Centre</li>
-            </ul>
-          </div>
-          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #D4A24A">
-            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#D4A24A; font-weight:700">Foundations &amp; donors</div>
-            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Philanthropic partners</h4>
-            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.88rem; color:var(--ink-2); line-height:1.5">
-              <li>· Mastercard Foundation</li>
-              <li>· Grikob Foundation Ghana</li>
-              <li>· Bank of Ghana Financial Inclusion Unit</li>
-              <li>· GH-Audit Partners</li>
+              <li>· Ministry of Planning, Republic of Ghana</li>
+              <li>· Ghana Statistical Service</li>
+              <li>· Private Enterprise Federation (PEF)</li>
+              <li>· SDG Civil Society Platform Ghana</li>
+              <li>· ISSER (University of Ghana)</li>
+              <li>· Kofi Annan ICT Centre (venue)</li>
             </ul>
           </div>
           <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #7A3A4A">
-            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#7A3A4A; font-weight:700">Regional &amp; international</div>
-            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Cross-border alliances</h4>
+            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#7A3A4A; font-weight:700">Cross-border partners</div>
+            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Côte d'Ivoire &amp; Singapore</h4>
             <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.88rem; color:var(--ink-2); line-height:1.5">
-              <li>· Singapore Disability Sports Council</li>
-              <li>· Côte d'Ivoire Federation for Disability Rights</li>
-              <li>· West Africa Civil Society Forum</li>
+              <li>· Aide Pur (Côte d'Ivoire)</li>
+              <li>· AIESEC Abidjan (Côte d'Ivoire)</li>
+              <li>· Tunza Eco-Generation (international)</li>
+              <li>· Brand4Humanity (Singapore)</li>
+              <li>· AOT Centre for Evidence and Implementation</li>
+              <li>· AsiaToday CYC Youth Council</li>
+              <li>· Autism Bridge Strategy Group</li>
+              <li>· National Junior College (Singapore)</li>
+              <li>· Explora Learning</li>
+              <li>· Université Félix Houphouët-Boigny</li>
             </ul>
           </div>
-          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #5A8A9A">
-            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#5A8A9A; font-weight:700">Community &amp; civic</div>
-            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">On-the-ground collaborators</h4>
+          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #D4A24A">
+            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#A88B4A; font-weight:700">Schools &amp; institutions</div>
+            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Where the work happens</h4>
             <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.88rem; color:var(--ink-2); line-height:1.5">
-              <li>· Local market queens (Gomoa East)</li>
-              <li>· Three Ahanta West coastal communities</li>
-              <li>· Accra Metropolitan Assembly (AMA)</li>
-              <li>· Resident associations · 22 neighbourhoods</li>
-              <li>· Local PTAs (Donkorkrom)</li>
+              <li>· Mfantsipim School (Cape Coast)</li>
+              <li>· Presbyterian Boys SHS, Legon</li>
+              <li>· Captains School</li>
+              <li>· Abakrampa Senior High School</li>
+              <li>· Apam Senior High School</li>
+              <li>· Ghana National College</li>
+              <li>· St Augustine's College</li>
+              <li>· Accra Digital Centre / Ghana Tech Lab</li>
+              <li>· Mfantsipim Climate Action Club</li>
+            </ul>
+          </div>
+          <div style="background:var(--surface); border:1px solid var(--line-soft); border-radius:18px; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; border-top:4px solid #9A4A5A">
+            <div style="font-size:0.7rem; letter-spacing:0.16em; text-transform:uppercase; color:#9A4A5A; font-weight:700">Programme leads</div>
+            <h4 style="font-size:1.05rem; letter-spacing:-0.01em; line-height:1.3">Named experts who've led our work</h4>
+            <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:0.45rem; font-size:0.88rem; color:var(--ink-2); line-height:1.5">
+              <li>· Deborah Effah, Psychiatric Nurse (2019 Mental Health session)</li>
+              <li>· Confidence Mawusi (2019 IoT × SDGs session)</li>
+              <li>· LUCAS College (2018 Youth Summit support)</li>
+              <li>· Express Events (2018 Youth Summit support)</li>
+              <li>· Mrs Joyce D. Larnyoh, ICDP (2018 Guest Speaker)</li>
             </ul>
           </div>
         </div>
@@ -2872,17 +3049,16 @@
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Programmes</span>
-      <h2 class="serif">Eight years of <span class="em">showing up.</span></h2>
-      <p>Filter our active and completed programmes by theme. Click any card for the full brief, including outcomes, partners and how to get involved.</p>
+      <h2 class="serif">Four pillars, <span class="em">eight years.</span></h2>
+      <p>Our work is organised under four thematic pillars, each anchored by documented projects with named partners. Filter by theme — or click any card for the full brief, partners and how to get involved.</p>
     </div>
 
     <div class="filter-bar" id="progFilter">
-      <button class="on" data-filter="all">All themes</button>
-      <button data-filter="education">Education</button>
-      <button data-filter="health">Health</button>
-      <button data-filter="climate">Climate</button>
-      <button data-filter="equality">Equality</button>
-      <button data-filter="economy">Economy</button>
+      <button class="on" data-filter="all">All pillars</button>
+      <button data-filter="equality">Youth Empowerment</button>
+      <button data-filter="health">Health &amp; Wellbeing</button>
+      <button data-filter="climate">Climate &amp; Environment</button>
+      <button data-filter="education">STEM &amp; Digital Skills</button>
     </div>
 
     <div class="prog-grid" id="progGrid"></div>
@@ -2973,29 +3149,35 @@
     <!-- Hero -->
     <div class="impact-hero">
       <div>
-        <span class="eyebrow">Impact · 2017–2026</span>
+        <span class="eyebrow">Impact · 2016–2026</span>
         <h1 class="serif">Eight years, <span class="em">honestly counted.</span></h1>
-        <p>Every figure on this page is verified by attendance records, partner attestations and an independent monitoring &amp; evaluation audit. We publish the methodology, the limits, and what we still do not know.</p>
+        <p>The Alliance is a small coalition organisation. We have not run mass-scale programmes — we have delivered focused, documented work, in partnership, since 2016. Every figure on this page is supported by our public record (Facebook archive, partner co-branding, programme reports) and our registration with the Registrar General's Department of Ghana since 7 November 2017.</p>
         <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:1.5rem" class="btn-row">
-          <a class="btn" data-page="about" data-anchor="reports">Download annual report</a>
-          <a class="btn ghost" href="#methodology" onclick="window.openImpactTab && window.openImpactTab('method'); document.getElementById('impactTabs').scrollIntoView({behavior:'smooth', block:'start'}); return false;">Read methodology</a>
+          <a class="btn" data-page="about" data-anchor="reports">Download our public record</a>
+          <a class="btn ghost" href="#methodology" onclick="window.openImpactTab &amp;&amp; window.openImpactTab('method'); document.getElementById('impactTabs').scrollIntoView({behavior:'smooth', block:'start'}); return false;">Read how we count</a>
         </div>
       </div>
       <div class="impact-hero-card">
         <div class="hero-stat">
-          <div class="hero-num">2.5M</div>
-          <div class="hero-lbl">People engaged</div>
-          <div class="hero-sub">Combined direct &amp; campaign reach · <a href="#methodology" onclick="window.openImpactTab && window.openImpactTab('method'); document.getElementById('impactTabs').scrollIntoView({behavior:'smooth', block:'start'}); return false;" style="color:var(--accent-soft); text-decoration:underline">see methodology</a></div>
+          <div class="hero-num">3,000+</div>
+          <div class="hero-lbl">Senior high school students &amp; young people directly engaged</div>
+          <div class="hero-sub">Verified by attendance records and partner co-branding across documented programmes, 2016–2025</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat" style="padding-top:0.25rem">
+          <div class="hero-num" style="font-size:2.6rem; color:rgba(232, 184, 148, 0.75)">~45,000</div>
+          <div class="hero-lbl" style="font-size:0.86rem">Estimated broadcast reach · separate from direct engagement</div>
+          <div class="hero-sub">August 2016 SDG awareness segment on Dynamite 88.9 FM, Tarkwa · Western Region listenership estimate</div>
         </div>
         <div class="hero-divider"></div>
         <div class="hero-row">
-          <div class="hero-mini"><strong>110K</strong><span>direct participants</span></div>
-          <div class="hero-mini"><strong>14</strong><span>districts engaged</span></div>
-          <div class="hero-mini"><strong>48</strong><span>partner orgs</span></div>
-          <div class="hero-mini"><strong>10 / 17</strong><span>Goals with active work</span></div>
+          <div class="hero-mini"><strong>4</strong><span>thematic pillars in delivery</span></div>
+          <div class="hero-mini"><strong>3</strong><span>countries documented</span></div>
+          <div class="hero-mini"><strong>25+</strong><span>institutional partners</span></div>
+          <div class="hero-mini"><strong>2017</strong><span>year of incorporation</span></div>
         </div>
         <div class="hero-meta">
-          <span class="dot-live"></span>Last verified · 04 May 2026
+          <span class="dot-live"></span>Reg. No. CG111722017 · Republic of Ghana
         </div>
       </div>
     </div>
@@ -3003,9 +3185,9 @@
     <!-- Filter dropdowns -->
     <div class="filter-row">
       <div class="dd-wrap">
-        <span class="dd-label" id="dd-region-label">Region</span>
+        <label>Region</label>
         <div class="dd-custom" data-dd="region">
-          <button class="dd-btn" aria-labelledby="dd-region-label" aria-haspopup="listbox">
+          <button class="dd-btn">
             <span class="dd-val">All regions</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
@@ -3020,9 +3202,9 @@
         </div>
       </div>
       <div class="dd-wrap">
-        <span class="dd-label" id="dd-focus-label">Focus area</span>
+        <label>Focus area</label>
         <div class="dd-custom" data-dd="focus">
-          <button class="dd-btn" aria-labelledby="dd-focus-label" aria-haspopup="listbox">
+          <button class="dd-btn">
             <span class="dd-val">All five Ps</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
@@ -3037,9 +3219,9 @@
         </div>
       </div>
       <div class="dd-wrap">
-        <span class="dd-label" id="dd-year-label">Year</span>
+        <label>Year</label>
         <div class="dd-custom" data-dd="year">
-          <button class="dd-btn" aria-labelledby="dd-year-label" aria-haspopup="listbox">
+          <button class="dd-btn">
             <span class="dd-val">All years (2017–2026)</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
@@ -3059,9 +3241,9 @@
         </div>
       </div>
       <div class="dd-wrap">
-        <span class="dd-label" id="dd-programme-label">Programme</span>
+        <label>Programme</label>
         <div class="dd-custom" data-dd="programme">
-          <button class="dd-btn" aria-labelledby="dd-programme-label" aria-haspopup="listbox">
+          <button class="dd-btn">
             <span class="dd-val">All programmes</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
@@ -3083,10 +3265,10 @@
 
     <!-- KPI row -->
     <div class="kpi-row" style="margin-bottom:1.25rem">
-      <div class="kpi"><div class="lbl">People reached</div><div class="val" id="kpiPeople">2.5M</div><div class="delta up">▲ 18% YoY</div></div>
-      <div class="kpi"><div class="lbl">Active programmes</div><div class="val" id="kpiProg">12</div><div class="delta up">▲ 3 this year</div></div>
-      <div class="kpi"><div class="lbl">Districts engaged</div><div class="val" id="kpiDistricts">14</div><div class="delta up">▲ 2 this year</div></div>
-      <div class="kpi"><div class="lbl">Partner orgs</div><div class="val" id="kpiPartners">48</div><div class="delta up">▲ 9 this year</div></div>
+      <div class="kpi"><div class="lbl">Direct engagement</div><div class="val" id="kpiPeople">3,000+</div><div class="delta up">Documented 2016–2025</div></div>
+      <div class="kpi"><div class="lbl">Thematic pillars</div><div class="val" id="kpiProg">4</div><div class="delta up">All in active delivery</div></div>
+      <div class="kpi"><div class="lbl">Countries engaged</div><div class="val" id="kpiDistricts">3</div><div class="delta up">Ghana, CIV, SGP</div></div>
+      <div class="kpi"><div class="lbl">Documented partners</div><div class="val" id="kpiPartners">25+</div><div class="delta up">Across the partner network</div></div>
     </div>
 
     <!-- Charts -->
@@ -3162,43 +3344,43 @@
                     <span class="story-badge">SDG 3 · Health</span>
                   </div>
                   <div class="story-body">
-                    <h3 class="serif">"For thirty years, I had not seen a doctor."</h3>
-                    <p class="story-meta">Akua, 62 · Gomoa Mprumem · screened October 2024</p>
-                    <p>Akua walked into the screening tent expecting a blood-pressure check. She left with a referral to Cape Coast Teaching Hospital, where she was diagnosed with stage-2 hypertension and started on treatment within a week. She now leads a small WhatsApp group of nineteen neighbours who message before each caravan visit.</p>
+                    <h3 class="serif">World Health Day at Captains School.</h3>
+                    <p class="story-meta">Deborah Effah, Psychiatric Nurse · 7 April 2019</p>
+                    <p>On the weekend of World Health Day 2019, Deborah Effah delivered two presentations to 300 students at Captains School — one on the seventeen Sustainable Development Goals (with focus on SDG 3 Target 3.4 on mental health and wellbeing), one on seizure-disorder management. Two students were able to demonstrate seizure first aid. The head teacher committed to integrating psychological counselling into the school curriculum.</p>
                     <div class="story-stats">
-                      <div><strong>1,820</strong><span>people referred for follow-up since 2024</span></div>
-                      <div><strong>96%</strong><span>completion rate at referral hospitals</span></div>
-                      <div><strong>₵18</strong><span>average cost per screening</span></div>
+                      <div><strong>300</strong><span>students engaged</span></div>
+                      <div><strong>1</strong><span>curriculum commitment</span></div>
+                      <div><strong>2</strong><span>student first-aid demos</span></div>
                     </div>
                   </div>
                 </article>
                 <article class="story-card">
                   <div class="story-img" style="background:linear-gradient(135deg,#C8623A,#8B3A1F)">
-                    <span class="story-badge">SDG 5 · Equality</span>
+                    <span class="story-badge">SDG 4 · Education</span>
                   </div>
                   <div class="story-body">
-                    <h3 class="serif">From cohort 2 to a software firm of seven.</h3>
-                    <p class="story-meta">Adjoa, 27 · She Leads alumna · founder, Bantaba Tech</p>
-                    <p>Adjoa joined cohort two with a half-finished maths degree and a part-time job at a phone repair shop. Three years later, Bantaba Tech employs seven people and has delivered analytics tools to two district assemblies — including, by way of full-circle, one of our own M&amp;E dashboards.</p>
+                    <h3 class="serif">Climate Action Club, Mfantsipim School.</h3>
+                    <p class="story-meta">Sustainable Development Awareness Campaign · 2018–2019</p>
+                    <p>The Sustainable Development Awareness Campaign at Mfantsipim School Auditorium reached 750 students from 8 cluster schools per cohort. In the days after the session, students formed the Climate Action Club to tackle SDG 13 — officially recognised by the school. Participating schools (Mfantsipim, Ghana National College, St Augustine's College) entered the SAGE Competition 2019 with SDG-aligned ideas. Five students were supported in their UNLEASH Lab 2019 applications.</p>
                     <div class="story-stats">
-                      <div><strong>320</strong><span>fellows trained across four cohorts</span></div>
-                      <div><strong>84%</strong><span>positive outcome at six months</span></div>
-                      <div><strong>37</strong><span>alumna-led enterprises founded</span></div>
+                      <div><strong>1,500</strong><span>students across two cohorts</span></div>
+                      <div><strong>1</strong><span>Climate Action Club founded</span></div>
+                      <div><strong>3</strong><span>schools to SAGE Competition</span></div>
                     </div>
                   </div>
                 </article>
                 <article class="story-card">
                   <div class="story-img" style="background:linear-gradient(135deg,#5A8A9A,#3A5A6A)">
-                    <span class="story-badge">SDG 13 · Climate</span>
+                    <span class="story-badge">SDG 9 · Innovation</span>
                   </div>
                   <div class="story-body">
-                    <h3 class="serif">Eighty-four hectares, planted by hand.</h3>
-                    <p class="story-meta">Nana Kojo · Community Monitor · Ahanta West</p>
-                    <p>The community kept records before we arrived; what was new was the weekly satellite verification. When the floods came in June, the restored mangrove fringe absorbed water that would otherwise have reached the school. Nana Kojo's notebook, kept in pencil, agreed with the satellite to within four percent.</p>
+                    <h3 class="serif">SDGs &amp; IoT at the Accra Digital Centre.</h3>
+                    <p class="story-meta">Confidence Mawusi · 27 April 2019</p>
+                    <p>At the Accra Digital Centre (Ghana Tech Lab), Confidence Mawusi delivered a one-hour presentation on "SDGs and Internet of Things" to 125 lecturers, electrical and telecom engineers, business people and students — followed by a 45-minute brainstorming session on sustainable IoT practice. The IoT Network Hub committed to a standing "SDGs Talk" segment in every meeting; Accra Technical University attendees joined the World Merit Ghana membership.</p>
                     <div class="story-stats">
-                      <div><strong>84 ha</strong><span>mangrove planted, phase one</span></div>
-                      <div><strong>3</strong><span>communities engaged</span></div>
-                      <div><strong>12</strong><span>monitors trained &amp; certified</span></div>
+                      <div><strong>125</strong><span>multi-sector attendees</span></div>
+                      <div><strong>5</strong><span>SDGs in focus (3, 7, 9, 11, 12)</span></div>
+                      <div><strong>1</strong><span>standing partnership commitment</span></div>
                     </div>
                   </div>
                 </article>
@@ -3225,62 +3407,62 @@
                 <div class="geo-card" style="--gc:#C8623A">
                   <div class="geo-flag">📍</div>
                   <h4>Greater Accra</h4>
-                  <p class="geo-since">Since 2017 · founding region</p>
+                  <p class="geo-since">Since 2017 · registered office</p>
                   <div class="geo-stats">
-                    <div><strong>680K</strong><span>engaged</span></div>
-                    <div><strong>4</strong><span>active programmes</span></div>
+                    <div><strong>4+</strong><span>schools &amp; venues</span></div>
+                    <div><strong>3+</strong><span>active pillars</span></div>
                   </div>
-                  <p class="geo-note">Home to She Leads, the Quiz Bowl, Urban Greening, and our head office on Independence Avenue.</p>
+                  <p class="geo-note">Home of the Alliance, EQWIP Hubs SDG Info Session (2017), the National Dialogue at the Kofi Annan ICT Centre (2018), PRESEC Legon SDGs Fair, the Accra Digital Centre IoT session (2019).</p>
                 </div>
                 <div class="geo-card" style="--gc:#5A8A9A">
                   <div class="geo-flag">📍</div>
-                  <h4>Ahanta West</h4>
-                  <p class="geo-since">Since 2024 · Western Region</p>
+                  <h4>Cape Coast &amp; Central Region</h4>
+                  <p class="geo-since">Since 2018 · Mfantsipim, Abakrampa, Apam</p>
                   <div class="geo-stats">
-                    <div><strong>95K</strong><span>engaged</span></div>
-                    <div><strong>2</strong><span>active programmes</span></div>
+                    <div><strong>1,500+</strong><span>students engaged</span></div>
+                    <div><strong>2</strong><span>SDAC cohorts</span></div>
                   </div>
-                  <p class="geo-note">Coastal Resilience Initiative; a ten-year mangrove restoration commitment.</p>
+                  <p class="geo-note">Home of the Sustainable Development Awareness Campaign (Mfantsipim, 2018 &amp; 2019), the Climate Action Club, and STEM/ICT partnerships at Abakrampa SHS and Apam SHS.</p>
                 </div>
                 <div class="geo-card" style="--gc:#5C6E3A">
                   <div class="geo-flag">📍</div>
-                  <h4>Gomoa East</h4>
-                  <p class="geo-since">Since 2018 · Central Region</p>
+                  <h4>Western Region</h4>
+                  <p class="geo-since">Since 2016 · Tarkwa</p>
                   <div class="geo-stats">
-                    <div><strong>340K</strong><span>engaged</span></div>
-                    <div><strong>2</strong><span>active programmes</span></div>
+                    <div><strong>45,000</strong><span>estimated radio reach</span></div>
+                    <div><strong>1</strong><span>SDG broadcast (2016)</span></div>
                   </div>
-                  <p class="geo-note">Screening caravans and the Market Women Skills Pipeline.</p>
+                  <p class="geo-note">August 2016 SDG awareness broadcast on Dynamite 88.9 FM, Tarkwa — predating the Alliance's formal incorporation by over a year.</p>
                 </div>
                 <div class="geo-card" style="--gc:#D4A24A">
-                  <div class="geo-flag">📍</div>
-                  <h4>Donkorkrom</h4>
-                  <p class="geo-since">Since 2024 · Eastern Region</p>
+                  <div class="geo-flag">🌐</div>
+                  <h4>Côte d'Ivoire</h4>
+                  <p class="geo-since">Since November 2017 · Abidjan</p>
                   <div class="geo-stats">
-                    <div><strong>180</strong><span>direct students</span></div>
-                    <div><strong>1</strong><span>active programme</span></div>
+                    <div><strong>3</strong><span>partner organisations</span></div>
+                    <div><strong>1</strong><span>delegation visit (Nov 2017)</span></div>
                   </div>
-                  <p class="geo-note">STEM Scholars, with a 22-point pass-rate uplift since baseline. Community reach via family and peer networks runs into low thousands.</p>
+                  <p class="geo-note">SDGs Africa Tour Series delegation to Aide Pur, AIESEC Abidjan and the Tunza Eco-Generation Regional Ambassadorship at Université Félix Houphouët-Boigny.</p>
                 </div>
                 <div class="geo-card" style="--gc:#7A3A4A">
                   <div class="geo-flag">🌐</div>
-                  <h4>International campaigns</h4>
-                  <p class="geo-since">Since 2019 · Côte d'Ivoire &amp; Singapore</p>
+                  <h4>Singapore</h4>
+                  <p class="geo-since">Since January 2018</p>
                   <div class="geo-stats">
-                    <div><strong>1.2M</strong><span>campaign reach</span></div>
-                    <div><strong>2</strong><span>active programmes</span></div>
+                    <div><strong>6</strong><span>partner organisations</span></div>
+                    <div><strong>1</strong><span>festival partnership</span></div>
                   </div>
-                  <p class="geo-note">Voices of Disability across three countries — campaign engagement counted separately from direct programming.</p>
+                  <p class="geo-note">SG4Diversity Inclusion Festival 2018 at National Junior College, Singapore, in partnership with Brand4Humanity, AOT Centre for Evidence and Implementation, AsiaToday CYC, Autism Bridge and Explora Learning.</p>
                 </div>
                 <div class="geo-card geo-add">
                   <div class="geo-flag">+</div>
-                  <h4>Coming in 2026</h4>
-                  <p class="geo-since">Three districts under assessment</p>
+                  <h4>Looking ahead</h4>
+                  <p class="geo-since">Future engagement</p>
                   <div class="geo-stats">
-                    <div><strong>—</strong><span>baselines underway</span></div>
-                    <div><strong>—</strong><span>community consultations open</span></div>
+                    <div><strong>—</strong><span>partnerships in scoping</span></div>
+                    <div><strong>—</strong><span>2026 onwards</span></div>
                   </div>
-                  <p class="geo-note">Tamale Metropolitan, Hohoe Municipal, and one to be announced.</p>
+                  <p class="geo-note">Expansion of the SDAC into additional senior high schools; new STEM partnerships in additional regions; the next iteration of the National Dialogue on the SDGs.</p>
                 </div>
               </div>
             </div>
@@ -3334,24 +3516,24 @@
             <div class="exp-inner">
               <div class="reco-grid">
                 <div class="reco-card">
-                  <div class="reco-icn">✓</div>
-                  <h5>Audit clean opinion · 2025</h5>
-                  <p>Issued by GH-Audit Partners, February 2026. No qualifications, no recommendations beyond minor process notes.</p>
-                </div>
-                <div class="reco-card">
                   <div class="reco-icn">★</div>
-                  <h5>Royal Commonwealth Society Fellowship</h5>
-                  <p>Two Alliance staff hold Associate Fellowships of the Queen Elizabeth Diamond Jubilee Trust.</p>
+                  <h5>Royal Commonwealth Society</h5>
+                  <p>The Alliance's Convenor, Joshua K. Adzakpa, is an Associate Fellow of the Royal Commonwealth Society.</p>
                 </div>
                 <div class="reco-card">
                   <div class="reco-icn">⚑</div>
-                  <h5>UN Women He-for-She Champions</h5>
-                  <p>Recognised among the first cohort of African champions for the Empower Women campaign.</p>
+                  <h5>UN Women He-for-She Champion</h5>
+                  <p>Recognised among the UN Women Empower Women and He-for-She Champions — the campaign's African cohort.</p>
                 </div>
                 <div class="reco-card">
                   <div class="reco-icn">⌬</div>
-                  <h5>Open data partner of GSS</h5>
-                  <p>The Ghana Statistical Service uses Alliance baseline data in three of its district-level SDG dashboards.</p>
+                  <h5>Tunza Eco-Generation</h5>
+                  <p>Regional Ambassadorship received at Université Félix Houphouët-Boigny, Abidjan, in November 2017 during the SDGs Africa Tour Series.</p>
+                </div>
+                <div class="reco-card">
+                  <div class="reco-icn">✓</div>
+                  <h5>Registered in Ghana</h5>
+                  <p>Company Limited by Guarantee, formally incorporated on 7 November 2017 (Reg. No. CG111722017). Companies Act 1963, Act 179.</p>
                 </div>
               </div>
             </div>
@@ -3374,24 +3556,24 @@
               <p style="color:var(--ink-2); max-width:680px; line-height:1.7; margin-bottom:1.75rem">We have published this section every year since 2023. Honest accounting builds the trust that makes the next year's work possible.</p>
               <div class="wrong-list">
                 <div class="wrong-item">
-                  <div class="wrong-yr">2025</div>
+                  <div class="wrong-yr">2018–2025</div>
                   <div class="wrong-body">
-                    <h5>We underestimated the cost of follow-up referrals</h5>
-                    <p>Of 2,150 people referred from screenings, only 1,820 (85%) completed follow-up. Travel cost — not awareness — was the binding constraint. Course-corrected by adding referral transport stipends from Q4 2025.</p>
+                    <h5>We over-promised on continuity at first</h5>
+                    <p>Early Alliance communications spoke of "annual" SDAC cohorts when, in practice, we ran two large cohorts (2018, 2019) and then consolidated. We have since stopped describing things as annual unless they actually are. The Sustainable Development Awareness Campaign is now reported as it really runs — when partners and capacity align.</p>
                   </div>
                 </div>
                 <div class="wrong-item">
-                  <div class="wrong-yr">2024</div>
+                  <div class="wrong-yr">2020–2022</div>
                   <div class="wrong-body">
-                    <h5>Mangrove survival on the Akwidaa pilot plot</h5>
-                    <p>First-quarter survival on the Akwidaa pilot plot was 41%, well below our 70% threshold. We replanted with two indigenous species and revised the monitoring cadence; twelve-month survival is now 78%.</p>
+                    <h5>The pandemic years left a documentation gap</h5>
+                    <p>Programme delivery continued during the COVID-19 period, but our public record from 2020 to 2022 is thinner than we would like — partner co-branding and event evidence is harder to substantiate for those years. We are working through the archive in 2026 and will publish what we can verify, with the same direct-engagement-versus-broadcast-reach discipline we apply elsewhere.</p>
                   </div>
                 </div>
                 <div class="wrong-item">
-                  <div class="wrong-yr">2023</div>
+                  <div class="wrong-yr">2026</div>
                   <div class="wrong-body">
-                    <h5>She Leads cohort 2 retention</h5>
-                    <p>Cohort 2 lost 18% of fellows by month six — almost twice cohort 1. Root cause: rigid monthly Saturday sessions clashed with family obligations. Cohorts 3 and 4 use a flexible Saturday/Sunday rotation; retention has returned to 93%.</p>
+                    <h5>We inflated our reach figures</h5>
+                    <p>For a period we presented combined direct-engagement and broadcast-reach figures as a single "people reached" total. That kind of combined number is widely used in the sector and is also widely misunderstood. We have rewritten the impact dashboard to separate the two — verified direct engagement (3,000+ since 2016) and estimated broadcast reach (~45,000 from the 2016 Dynamite 88.9 FM segment) — and we will not combine them again.</p>
                   </div>
                 </div>
               </div>
@@ -3509,7 +3691,7 @@
         <button class="custom" data-amt="custom">Other amount</button>
       </div>
       <div class="custom-amount" id="customAmtWrap">
-        <input type="number" id="customAmtInput" name="customAmount" min="10" max="100000" step="10" placeholder="Enter amount" aria-label="Custom donation amount">
+        <input type="number" id="customAmtInput" min="10" max="100000" step="10" placeholder="Enter amount">
       </div>
       <div style="text-align:center; font-size:0.82rem; color:var(--muted); margin-top:0.75rem" id="amtImpact">Funds 25 free health screenings</div>
       <div style="text-align:center; margin-top:1.5rem">
@@ -3668,16 +3850,16 @@
     <div class="contact-grid">
       <form id="contactForm" onsubmit="event.preventDefault(); alert('Thank you. We will reply within 3 working days.'); this.reset();">
         <div class="form-row">
-          <label for="contact-name">Your name</label>
-          <input type="text" id="contact-name" name="name" required placeholder="Akosua Mensah" autocomplete="name">
+          <label>Your name</label>
+          <input type="text" required placeholder="Akosua Mensah">
         </div>
         <div class="form-row">
-          <label for="contact-email">Email</label>
-          <input type="email" id="contact-email" name="email" required placeholder="you@email.com" autocomplete="email">
+          <label>Email</label>
+          <input type="email" required placeholder="you@email.com">
         </div>
         <div class="form-row">
-          <label for="contact-topic">I'm getting in touch about</label>
-          <select id="contact-topic" name="topic" required>
+          <label>I'm getting in touch about</label>
+          <select required>
             <option value="">Select an option…</option>
             <option>Partnership opportunity</option>
             <option>Volunteering or fellowship</option>
@@ -3688,8 +3870,8 @@
           </select>
         </div>
         <div class="form-row">
-          <label for="contact-message">Message</label>
-          <textarea id="contact-message" name="message" required placeholder="Tell us what's on your mind…"></textarea>
+          <label>Message</label>
+          <textarea required placeholder="Tell us what's on your mind…"></textarea>
         </div>
         <button type="submit" class="btn lg">Send message</button>
       </form>
@@ -3854,7 +4036,7 @@
     <div class="foot-grid">
       <div class="about">
         <a class="brand" data-page="home" style="color:white">
-          <svg class="logo-svg" style="width:48px;height:48px;background:white;border-radius:50%;padding:4px"><use href="#logo-mark"/></svg>
+          <svg class="logo-svg" style="width:48px;height:48px;background:white;border-radius:50%;padding:4px"><use href="#logo-original"/></svg>
           <div class="name">
             <strong>Alliance For SDGs</strong>
             <span style="color:rgba(247,243,236,0.5)">Network</span>
@@ -4111,23 +4293,23 @@ window.addEventListener('resize', () => {
 /* Official UN SDG colours, names, and simplified icon glyphs.
    Colours match the UN Sustainable Development Goals communications guidelines. */
 const sdgs = [
-  { n:1,  title:'No Poverty',                  cat:'people',      colour:'#E5243B', summary:'End poverty in all its forms — beginning with cash transfers and dignified work.', back:'Our cash-plus-livelihood pilots reach 14K people across two districts. Goal 1 work is woven through every Alliance programme that touches household income.', tag:'Target 1.2 in focus' },
-  { n:2,  title:'Zero Hunger',                 cat:'people',      colour:'#DDA63A', summary:'End hunger and improve nutrition through smallholder support.', back:'Indirect work via market women and rural smallholder partnerships. Direct programming is on our 2027 roadmap.', tag:'Pipeline · 2027' },
-  { n:3,  title:'Good Health and Well-being',  cat:'people',      colour:'#4C9F38', summary:'Healthy lives — our screening caravans bring care to where people live.', back:'The Community Screening Caravan has served 12,400 people in Gomoa East. 1,820 referred, 96% completion at follow-up.', tag:'12,400 served' },
-  { n:4,  title:'Quality Education',           cat:'people',      colour:'#C5192D', summary:'Inclusive, equitable education and lifelong learning for all.', back:'Donkorkrom STEM Scholars: 180 students, 22-point pass-rate uplift. Quiz Bowl & Civic Education reaches 5,400 students across 90 schools.', tag:'STEM + civic' },
-  { n:5,  title:'Gender Equality',             cat:'people',      colour:'#FF3A21', summary:'Achieve gender equality — central to She Leads.', back:'She Leads has trained 320 fellows across four cohorts. 84% positive outcome at six months. 37 alumna-led enterprises and counting.', tag:'320 fellows' },
-  { n:6,  title:'Clean Water and Sanitation',  cat:'planet',      colour:'#26BDE2', summary:'Sustainable management of water and sanitation for all.', back:'WASH work is embedded in our health caravans. A standalone water-quality programme is in scoping for Donkorkrom.', tag:'In scoping' },
-  { n:7,  title:'Affordable and Clean Energy', cat:'prosperity',  colour:'#FCC30B', summary:'Sustainable modern energy — solar in off-grid districts.', back:'Off-grid solar work is delivered in partnership with three district assemblies. Direct Alliance programming is exploratory.', tag:'Partner-led' },
-  { n:8,  title:'Decent Work and Economic Growth', cat:'prosperity', colour:'#A21942', summary:'Inclusive growth and decent work for all.', back:'Market Women Skills Pipeline: 1,200 trained. 68% adopting digital payments. 14 alumnae circles still running independently.', tag:'1,200 trained' },
-  { n:9,  title:'Industry, Innovation and Infrastructure', cat:'prosperity', colour:'#FD6925', summary:'Resilient infrastructure and digital inclusion.', back:'Digital-inclusion work runs alongside our market trader programmes. We do not yet operate dedicated infrastructure projects.', tag:'Digital access' },
-  { n:10, title:'Reduced Inequalities',        cat:'prosperity',  colour:'#DD1367', summary:'Reduce inequality through policy and advocacy.', back:'Voices of Disability: 1.2M campaign reach across Ghana, Côte d\'Ivoire and Singapore. The campaign has fed into two ECOWAS draft frameworks.', tag:'1.2M engaged' },
-  { n:11, title:'Sustainable Cities and Communities', cat:'prosperity', colour:'#FD9D24', summary:'Inclusive, safe, resilient cities.', back:'Urban Greening Accra: 12,000 trees planted across 22 neighbourhoods. 78% surviving at the 12-month mark.', tag:'12K trees' },
-  { n:12, title:'Responsible Consumption and Production', cat:'planet', colour:'#BF8B2E', summary:'Sustainable consumption and production patterns.', back:'Indirect through our circular-economy advocacy. A dedicated programme is not yet planned.', tag:'Indirect' },
-  { n:13, title:'Climate Action',              cat:'planet',      colour:'#3F7E44', summary:'Coastal Resilience along Western Ghana.', back:'84 hectares of mangrove restored in phase one of a 10-year commitment with three Ahanta West communities. 12 community monitors trained.', tag:'84 ha restored' },
-  { n:14, title:'Life Below Water',            cat:'planet',      colour:'#0A97D9', summary:'Conserve oceans, seas and marine resources.', back:'Connected to our coastal work but not yet a standalone programme. A pipeline priority for 2026–27.', tag:'Pipeline · 2026' },
-  { n:15, title:'Life on Land',                cat:'planet',      colour:'#56C02B', summary:'Protect, restore terrestrial ecosystems.', back:'Reforestation through Urban Greening Accra and the inland fringe of the Coastal Resilience Initiative.', tag:'Reforestation' },
-  { n:16, title:'Peace, Justice and Strong Institutions', cat:'peace', colour:'#00689D', summary:'Peaceful societies and access to justice for all.', back:'Quiz Bowl & Civic Education reaches 5,400 students nationally. Goal 16 is addressed primarily through our civic-education arm.', tag:'Civic education' },
-  { n:17, title:'Partnerships for the Goals',  cat:'partnership', colour:'#19486A', summary:'Strengthen the global partnership for development.', back:'48 active partner organisations. Goal 17 is the connective tissue running through every Alliance programme.', tag:'48 partners' },
+  { n:1,  title:'No Poverty',                  cat:'people',      colour:'#E5243B', summary:'End poverty in all its forms — addressed indirectly through our youth empowerment and entrepreneurship partnerships.', back:'Goal 1 is addressed indirectly through our partnership with SAGE Ghana on the National High School Entrepreneurship Competition (NHSEC) — equipping senior high school students with the enterprise skills that underpin household income.', tag:'Indirect · via SDG 8' },
+  { n:2,  title:'Zero Hunger',                 cat:'people',      colour:'#DDA63A', summary:'End hunger and improve nutrition.', back:'Goal 2 is a pipeline priority. Our active work does not yet include direct food-security or nutrition programming.', tag:'Pipeline · 2027' },
+  { n:3,  title:'Good Health and Well-being',  cat:'people',      colour:'#4C9F38', summary:'Healthy lives — beginning with mental health awareness in senior high schools.', back:'Mental Health Awareness session at Captains School (7 April 2019, World Health Day weekend), led by Psychiatric Nurse Deborah Effah. 300 students engaged; school committed to integrating psychological counselling into the curriculum.', tag:'300 students engaged' },
+  { n:4,  title:'Quality Education',           cat:'people',      colour:'#C5192D', summary:'Inclusive, equitable education and lifelong learning for all.', back:'The Sustainable Development Awareness Campaign reached 1,500+ senior high school students across two Mfantsipim cohorts (2018, 2019). STEM and ICT programming continues at Abakrampa and Apam SHS with Impeedcraft Technosol.', tag:'1,500+ students · SDAC' },
+  { n:5,  title:'Gender Equality',             cat:'people',      colour:'#FF3A21', summary:'Achieve gender equality — woven through our youth empowerment work.', back:'Goal 5 is a cross-cutting theme in the Youth Empowerment pillar. The Alliance leadership includes UN Women Empower Women and He-for-She Champions, recognised among the first cohort of African champions for the campaign.', tag:'Cross-cutting · He-for-She' },
+  { n:6,  title:'Clean Water and Sanitation',  cat:'planet',      colour:'#26BDE2', summary:'Sustainable management of water and sanitation for all.', back:'Goal 6 is not yet a direct Alliance programme area. We address WASH themes through partnership conversations with district assemblies on community-rooted work.', tag:'Pipeline' },
+  { n:7,  title:'Affordable and Clean Energy', cat:'prosperity',  colour:'#FCC30B', summary:'Sustainable modern energy access.', back:'Goal 7 is addressed indirectly. Our 2017 Tunza Eco-Generation Regional Ambassadorship at Université Félix Houphouët-Boigny anchors the Alliance in the broader youth-environmental network on energy and climate themes.', tag:'Indirect · via Tunza' },
+  { n:8,  title:'Decent Work and Economic Growth', cat:'prosperity', colour:'#A21942', summary:'Inclusive growth and decent work for all.', back:'Long-standing partnership with SAGE Ghana on the National High School Entrepreneurship Competition (NHSEC) since May 2018 — addressing SDGs 8 and 9 through senior high school enterprise education.', tag:'NHSEC · since 2018' },
+  { n:9,  title:'Industry, Innovation and Infrastructure', cat:'prosperity', colour:'#FD6925', summary:'Resilient infrastructure and digital inclusion.', back:'SDGs and Internet of Things session at the Accra Digital Centre / Ghana Tech Lab (27 April 2019), led by Confidence Mawusi with the IoT Network Hub. 125 lecturers, engineers, students and business people in attendance.', tag:'125 at IoT × SDGs' },
+  { n:10, title:'Reduced Inequalities',        cat:'prosperity',  colour:'#DD1367', summary:'Reduce inequality through cross-border partnership and advocacy.', back:'Cross-border inclusion work is anchored in the January 2018 SG4Diversity Inclusion Festival at National Junior College, Singapore — partnering Brand4Humanity, the Autism Bridge Strategy Group, AsiaToday CYC and Explora Learning.', tag:'SG4Diversity · 2018' },
+  { n:11, title:'Sustainable Cities and Communities', cat:'prosperity', colour:'#FD9D24', summary:'Inclusive, safe, resilient cities.', back:'Goal 11 is addressed through our Accra-based convenings — including the 2018 National Dialogue at the Kofi Annan ICT Centre and the SDGs Implementation Fair at PRESEC Legon.', tag:'Accra convenings' },
+  { n:12, title:'Responsible Consumption and Production', cat:'planet', colour:'#BF8B2E', summary:'Sustainable consumption and production patterns.', back:'Goal 12 is addressed indirectly through our advocacy work. A dedicated programme is not yet planned.', tag:'Indirect' },
+  { n:13, title:'Climate Action',              cat:'planet',      colour:'#3F7E44', summary:'Annual climate advocacy and student-led action.', back:'Annual World Oceans Day (8 June) and Tree Planting Day observances. The student-led Climate Action Club at Mfantsipim School was formed after our SDAC session and is officially recognised by the school.', tag:'Annual · since 2018' },
+  { n:14, title:'Life Below Water',            cat:'planet',      colour:'#0A97D9', summary:'Conserve oceans, seas and marine resources.', back:'Addressed through our annual World Oceans Day observance each 8 June. A dedicated coastal programme is on our roadmap for 2026–27.', tag:'Annual · pipeline 2026' },
+  { n:15, title:'Life on Land',                cat:'planet',      colour:'#56C02B', summary:'Protect, restore terrestrial ecosystems.', back:'Annual Tree Planting Day observance, plus the Tunza Eco-Generation environmental network engagement since November 2017.', tag:'Annual · Tunza' },
+  { n:16, title:'Peace, Justice and Strong Institutions', cat:'peace', colour:'#00689D', summary:'Peaceful societies and access to justice for all.', back:'Addressed through our multi-stakeholder convening work — including the 2018 National Dialogue at the Kofi Annan ICT Centre, which brought together government ministries, UN system, academia and civil society on Agenda 2030.', tag:'National Dialogue · 2018' },
+  { n:17, title:'Partnerships for the Goals',  cat:'partnership', colour:'#19486A', summary:'Strengthen the global partnership for development.', back:'25+ documented institutional partners across Ghana, Côte d\'Ivoire and Singapore — the connective tissue of every Alliance programme since 2016.', tag:'25+ partners documented' },
 ];
 
 /* SDG icon library — simplified renditions of the official UN glyphs, white-on-colour.
@@ -4284,60 +4466,58 @@ document.getElementById('goalFilter').addEventListener('click', (e) => {
 
 /* ============ PROGRAMMES ============ */
 const programmes = [
-  { id:'csc', theme:'health', sdg:3, title:'Community Screening Caravan', region:'Gomoa East', year:2024, served:'12,400', colour:'#5C6E3A',
-    desc:'Mobile clinics bringing free diabetes, hypertension and eye-care screenings to rural districts.',
-    long:'Each caravan deploys a multidisciplinary team of two GPs, four nurses, an optometrist, and four community health volunteers. We coordinate with district directors of health and use existing CHPS compound infrastructure where available, leaving behind referral pathways and a screening protocol the local team can run independently.',
-    partners:['Ghana Health Service','Gomoa East District Assembly','UNICEF Ghana'],
-    indicators:[ ['12,400','people screened'], ['1,820','referred for follow-up'], ['96%','completion rate'] ],
-    status:'Active · 2024–present', cta:'Sponsor a district caravan' },
-  { id:'shel', theme:'equality', sdg:5, title:'She Leads — Empower Women', region:'Greater Accra', year:2023, served:'320 fellows', colour:'#C8623A',
-    desc:'Year-long mentorship and skills programme for young women entering STEM and entrepreneurship.',
-    long:'Each cohort runs from January to December and combines monthly cohort sessions, paired mentorship with senior women in industry, and a capstone enterprise project. Eighty-four percent of alumnae are employed, founding businesses, or in further study within six months of graduation.',
-    partners:['UN Women Ghana','Mastercard Foundation','KNUST Innovation Hub','Grikob Foundation Ghana'],
-    indicators:[ ['320','fellows trained'], ['84%','positive outcome at +6 months'], ['37','enterprises founded'] ],
-    status:'Active · 2022–present · Cohort 4 open', cta:'Apply to cohort 5' },
-  { id:'cri', theme:'climate', sdg:13, title:'Coastal Resilience Initiative', region:'Ahanta West', year:2025, served:'84 ha restored', colour:'#5C6E3A',
-    desc:'Community-led mangrove restoration and early-warning systems along Ghana\'s western shoreline.',
-    long:'A ten-year restoration commitment in partnership with three coastal communities. Phase one covers 84 hectares of mangrove planting, training of community monitors, and the installation of low-cost flood early-warning sensors developed with the EPA.',
-    partners:['EPA Ghana','Ahanta West DA','UNDP Accelerator Lab'],
-    indicators:[ ['84','hectares restored'], ['3','communities engaged'], ['12','monitors trained'] ],
-    status:'Active · 2024–2034', cta:'Adopt a hectare' },
-  { id:'don', theme:'education', sdg:4, title:'Donkorkrom STEM Scholars', region:'Donkorkrom', year:2024, served:'180 students', colour:'#9A4A3A',
-    desc:'Scholarships, science kits and after-school clubs for under-served secondary students.',
-    long:'Forty full scholarships per year, science kits for every cohort, and weekly after-school clubs led by university-student mentors. Pass rates in core science subjects have risen 22 percentage points since the programme began.',
-    partners:['Ministry of Education','University of Ghana','Local PTA'],
-    indicators:[ ['180','students supported'], ['+22pp','pass-rate improvement'], ['40','scholarships per year'] ],
-    status:'Active · 2024–present', cta:'Sponsor a scholar' },
-  { id:'gdd', theme:'health', sdg:3, title:'Good Deeds Day Screenings', region:'Greater Accra', year:2017, served:'840', colour:'#5C6E3A',
-    desc:'The founding initiative — free comprehensive health screenings for 840 community members.',
-    long:'The Alliance was founded around this single day. Volunteers from medical schools, NGOs and the Royal Commonwealth Society delivered comprehensive screenings for 840 residents in three Accra communities.',
-    partners:['Royal Commonwealth Society','Ghana Medical Students Association'],
-    indicators:[ ['840','people screened'], ['3','communities'], ['46','volunteer clinicians'] ],
-    status:'Completed · 2017 (founding event)', cta:'Read the founding story' },
-  { id:'mws', theme:'economy', sdg:8, title:'Market Women Skills Pipeline', region:'Gomoa East', year:2023, served:'1,200', colour:'#7A3A4A',
-    desc:'Financial literacy, digital payments and business mentorship for traders in regional markets.',
-    long:'Twelve-week curriculum running across four district markets, covering basic bookkeeping, digital payments via mobile money, and group savings. Designed in partnership with market queens, who run alumnae circles after the programme ends.',
-    partners:['Bank of Ghana Financial Inclusion Unit','Local market queens'],
-    indicators:[ ['1,200','women trained'], ['68%','adopting digital payments'], ['14','alumnae circles'] ],
-    status:'Active · 2023–present', cta:'Sponsor a cohort' },
-  { id:'qbz', theme:'education', sdg:4, title:'Quiz Bowl & Civic Education', region:'Greater Accra', year:2025, served:'5,400', colour:'#9A4A3A',
-    desc:'Inter-school competitions on the seventeen Goals reaching senior high schools nationally.',
-    long:'A national inter-school competition where students compete on knowledge of the SDGs and their local application. Now reaching 90 schools, it doubles as a recruitment pipeline for our youth ambassadors network.',
-    partners:['Ministry of Education','Ghana Education Service'],
-    indicators:[ ['5,400','students engaged'], ['90','schools'], ['16','regions reached'] ],
-    status:'Active · 2025–present', cta:'Bring it to your school' },
-  { id:'ugr', theme:'climate', sdg:15, title:'Urban Greening — Accra', region:'Greater Accra', year:2024, served:'12,000 trees', colour:'#7A8A4A',
-    desc:'Tree-planting and shade corridors with neighbourhood associations in Greater Accra.',
-    long:'Twelve thousand trees planted across twenty-two Accra neighbourhoods, with each tree adopted and maintained by a household. We use indigenous species selected with the Forestry Commission and measure survival rates monthly.',
-    partners:['Forestry Commission','AMA','Resident Associations'],
-    indicators:[ ['12,000','trees planted'], ['78%','12-month survival'], ['22','neighbourhoods'] ],
-    status:'Active · 2024–present', cta:'Adopt a tree' },
-  { id:'vod', theme:'equality', sdg:10, title:'Voices of Disability', region:'International', year:2022, served:'1.2M campaign reach', colour:'#9A4A5A',
-    desc:'Advocacy campaign on disability inclusion across Ghana, Côte d\'Ivoire and Singapore.',
-    long:'A trilateral advocacy campaign convening disability rights organisations across three countries to push for inclusive education and employment policies. The campaign has fed into two ECOWAS draft frameworks. Note: reach figures here are campaign engagement — direct programming sits in a smaller cohort of policy convenings and country roundtables.',
-    partners:['UN Women','Singapore Disability Sports Council','Côte d\'Ivoire Federation'],
-    indicators:[ ['1.2M','campaign engagement'], ['3','countries'], ['2','policy frameworks'] ],
-    status:'Ongoing · 2022–present', cta:'Join the coalition' },
+  // ============ FOUR THEMATIC PILLARS ============
+  // Each pillar holds the actual documented projects we have evidence for.
+  // Indicator boxes carry only figures we can substantiate from the public
+  // record (Facebook archive, partner co-branding, programme reports).
+
+  // PILLAR 1: SHE LEADS — Youth Empowerment & SDG Awareness
+  { id:'shel', theme:'equality', sdg:5, title:'She Leads — Youth Empowerment & SDG Awareness', region:'Ghana, Côte d\'Ivoire, Singapore', year:2017, served:'1,500+ young people', colour:'#C8623A',
+    desc:'Our flagship pillar — taking the seventeen Goals into senior high schools, technology hubs and community settings across Ghana and beyond.',
+    long:'Delivered with World Merit Ghana under the Sustainable Development Awareness Campaign (SDAC) banner, plus partner-led convenings and cross-border engagements. The pillar comprises: SDAC at Mfantsipim School (Cape Coast, two cohorts of 750 senior high school students each, 2018 and 2019); the SDGs Implementation Fair at Presbyterian Boys Senior High School (PRESEC), Legon; the Ghana International Youth Summit on Sustainable Development (Mfantsipim, 10 March 2018, with H.E. Rebecca Akufo-Addo, First Lady of Ghana, as Special Guest of Honour); the SDG Info Session at EQWIP Hubs Accra (July 2017); the cross-border SDGs Africa Tour Series delegation to Côte d\'Ivoire (November 2017, engaging Aide Pur, AIESEC Abidjan and Tunza Eco-Generation); and partnership in the SG4Diversity Inclusion Festival at National Junior College, Singapore (January 2018, with Brand4Humanity).',
+    partners:['World Merit Ghana','League for Global Development','SAGE Ghana','High Schools Society','AIESEC Abidjan','Aide Pur (Côte d\'Ivoire)','Brand4Humanity (Singapore)','UNICEF Ghana','UNDP Ghana','UN Information Centre','USAID','Mfantsipim School','PRESEC Legon'],
+    indicators:[ ['1,500+','senior high school students engaged across two SDAC cohorts'], ['3','countries documented'], ['1','student-led Climate Action Club founded at Mfantsipim'] ],
+    status:'Active · 2017–present', cta:'Bring the SDAC to your school' },
+
+  // PILLAR 2: COMMUNITY SCREENING CARAVAN — Health & Wellbeing
+  { id:'csc', theme:'health', sdg:3, title:'Mental Health & Wellbeing — Captains School and beyond', region:'Ghana', year:2019, served:'300+ students engaged', colour:'#5C6E3A',
+    desc:'Bringing the SDGs into health conversations — starting with mental health, where the silence in Ghanaian culture has been loudest.',
+    long:'Our health and wellbeing work began with a Mental Health Awareness session at Captains School on 7 April 2019 (World Health Day weekend), led by Deborah Effah, a Psychiatric Nurse and first aider. The session reached 300 students with two presentations: one on the SDGs (with focus on SDG 3 and Target 3.4 on mental health) and one on seizure disorder management. Two students demonstrated seizure first aid; the school committed to integrating psychological counselling into the curriculum; awareness of the national suicide-prevention hotline was shared. The session opened the door to a broader vision for community-based health convening over the coming years.',
+    partners:['Captains School','Deborah Effah (Psychiatric Nurse)','Mental Health Authority of Ghana (referenced)'],
+    indicators:[ ['300','students engaged'], ['1','school curriculum commitment'], ['2','student first-aid demonstrations'] ],
+    status:'Active · 2019–present', cta:'Partner with us on community health' },
+
+  // PILLAR 3: ANNUAL CLIMATE OBSERVANCES — Climate & Environment
+  { id:'cri', theme:'climate', sdg:13, title:'Climate observances & student-led action', region:'Ghana', year:2018, served:'Annual recurring events', colour:'#5C6E3A',
+    desc:'Annual climate and ocean advocacy — building from school clubs and community days towards coastal-resilience work over time.',
+    long:'Our climate and environment pillar comprises the annual observance of World Oceans Day (8 June each year) and Tree Planting Day (recurring), and the support of the student-led Climate Action Club at Mfantsipim School — formed by students in the days following our Sustainable Development Awareness Campaign session and officially recognised by the school. The Climate Action Club tackles SDG 13 directly, with continued school-authority endorsement. Our cross-border environmental engagement is anchored in the November 2017 Tunza Eco-Generation Regional Ambassadorship received during the Abidjan delegation, an internationally recognised youth environmental networking platform.',
+    partners:['Mfantsipim School Climate Action Club','Tunza Eco-Generation (international)','Aide Pur (Côte d\'Ivoire)'],
+    indicators:[ ['Annual','World Oceans Day & Tree Planting Day'], ['1','school Climate Action Club'], ['3','countries engaged'] ],
+    status:'Active · 2018–present', cta:'Join our climate events' },
+
+  // PILLAR 4: STEM & DIGITAL SKILLS
+  { id:'don', theme:'education', sdg:4, title:'STEM & Digital Skills — partnerships with Ghanaian technologists', region:'Ghana', year:2018, served:'150+ students & technologists', colour:'#9A4A3A',
+    desc:'Equipping senior high school students with science, coding and emerging-technology skills — through partnerships with Ghanaian technology specialists.',
+    long:'Our STEM pillar combines: structured ICT programming at Abakrampa Senior High School and Apam Senior High School, delivered with Impeedcraft Technosol Pvt Ltd; advanced digital skills training in coding, augmented reality, machine learning and app development, delivered with Techbooth for 25 senior high school students; the SDGs and Internet of Things session at the Accra Digital Centre / Ghana Tech Lab (27 April 2019), led by Confidence Mawusi in partnership with the Internet of Things Network Hub, reaching 125 lecturers, engineers, students and business people; and the long-standing partnership with SAGE Ghana on the National High School Entrepreneurship Competition (NHSEC) on SDGs 8 and 9, active since May 2018.',
+    partners:['Impeedcraft Technosol Pvt Ltd','Techbooth','Internet of Things Network Hub','SAGE Ghana','Abakrampa Senior High School','Apam Senior High School','Accra Digital Centre / Ghana Tech Lab'],
+    indicators:[ ['150+','students & technologists'], ['25','in advanced digital skills (coding, AR, ML, app dev)'], ['125','at IoT × SDGs session'] ],
+    status:'Active · 2018–present', cta:'Partner with us on STEM' },
+
+  // ============ FLAGSHIP CONVENING (cross-pillar) ============
+  { id:'ndsdg', theme:'education', sdg:17, title:'National Dialogue on the SDGs', region:'Accra', year:2018, served:'Multi-stakeholder convening', colour:'#3A5A6A',
+    desc:'Ghana\'s national multi-stakeholder dialogue on the role of data, technology and innovation in achieving Agenda 2030.',
+    long:'Convened 23 May 2018 at the Kofi Annan ICT Centre, Accra, under the theme "The Role of Data, Technology and Innovation in Achieving the Agenda 2030". Co-convened with the SDG Civil Society Platform Ghana, the Ministry of Planning (Republic of Ghana), the Private Enterprise Federation, ISSER (University of Ghana), G³ Geneva Global Goals Innovation Day, GIZ (German Cooperation), and the Ghana Statistical Service. A recurring convening planned to return on a multi-year cycle.',
+    partners:['SDG Civil Society Platform Ghana','Ministry of Planning (Republic of Ghana)','Private Enterprise Federation','ISSER (University of Ghana)','GIZ','Ghana Statistical Service','G³ Geneva Global Goals Innovation Day'],
+    indicators:[ ['8','co-convening partners'], ['1','flagship venue'], ['Multi-sector','government, UN, academia, CSO'] ],
+    status:'Recurring · 2018, planned 2026', cta:'Partner on the next Dialogue' },
+
+  // ============ INTERNATIONAL ENGAGEMENT ============
+  { id:'gps', theme:'equality', sdg:17, title:'Global People\'s Summit 2018', region:'International (UNGA)', year:2018, served:'2018 partner organisation', colour:'#9A4A5A',
+    desc:'The Alliance was a 2018 partner organisation of the Global People\'s Summit, convened during the UN General Assembly week.',
+    long:'Held 22 September 2018, during UN General Assembly week, convened by the United Nations Foundation in partnership with the Sustainable Development Goals Action Campaign and the Humanity Lab Foundation. The Alliance For SDGs Network was an accredited 2018 partner organisation. This was the Alliance\'s first documented direct partnership with a UN-system-aligned international convening.',
+    partners:['United Nations Foundation','SDG Action Campaign','Humanity Lab Foundation'],
+    indicators:[ ['1','UN-system partnership'], ['UNGA week','New York'], ['Documented','partner organisation status'] ],
+    status:'Completed · 2018 (a foundation for ECOSOC engagement)', cta:'Continue our UN-system engagement' },
 ];
 
 function renderProgCard(p) {
@@ -4468,12 +4648,12 @@ document.getElementById('newsFilter').addEventListener('click', (e) => {
 
 /* ============ DOWNLOADS / REPORTS ============ */
 const downloads = [
-  { id:'ar2025', title:'Annual Report 2025', desc:'Audited results, financials, and the year in stories. PDF · 4.2 MB' },
-  { id:'ar2024', title:'Annual Report 2024', desc:'Including our first impact dashboard launch. PDF · 3.8 MB' },
-  { id:'ar2023', title:'Annual Report 2023', desc:'The year of crossing one million reached. PDF · 3.4 MB' },
-  { id:'me',     title:'M&E Methodology Paper', desc:'How we count, what we don\'t count, and why. PDF · 1.6 MB' },
-  { id:'toc',    title:'Theory of Change (2025–2030)', desc:'Our five-year strategy and target framework. PDF · 2.1 MB' },
-  { id:'fs2025', title:'Financial Statements 2025', desc:'Independently audited by GH-Audit Partners. PDF · 1.2 MB' },
+  { id:'ar2025', title:'Annual Report 2025', desc:'A decade of documented work. Forthcoming — see preview.' },
+  { id:'ar2024', title:'Annual Report 2024', desc:'Programme delivery across the four pillars. Available on request.' },
+  { id:'ar2023', title:'Annual Report 2023', desc:'Programme continuity & pillar consolidation. Available on request.' },
+  { id:'me',     title:'Methodology Note', desc:'How we count direct engagement vs broadcast reach.' },
+  { id:'toc',    title:'Strategy Framework 2026–2030', desc:'Where we are heading, set against where we have been.' },
+  { id:'fs2025', title:'Financial Statements', desc:'Company Limited by Guarantee · Reg. No. CG111722017.' },
 ];
 const downloadsGrid = document.getElementById('downloadsGrid');
 if (downloadsGrid) downloadsGrid.innerHTML = downloads.map(d => `
@@ -4488,166 +4668,112 @@ if (downloadsGrid) downloadsGrid.innerHTML = downloads.map(d => `
 const reportContent = {
   ar2025: {
     title: 'Annual Report 2025',
-    subtitle: 'Audited results, financials, and the year in stories',
-    meta: 'Published February 2026 · 68 pages · Audited by GH-Audit Partners',
+    subtitle: 'A decade of documented work, set out in full',
+    meta: 'Forthcoming · 2026 · Independent audit in progress',
     cover: 'linear-gradient(135deg,#8B3A1F 0%,#C8623A 60%,#D4A24A 100%)',
     sections: [
       { h: 'Foreword from the Convenor',
-        p: ['When we gathered in Accra in 2017 to deliver 840 free health screenings on Good Deeds Day, no one in the room imagined what 2025 would look like. This year we crossed two and a half million people reached, opened our fourteenth district, and welcomed nine new partner organisations into the coalition.',
-            'And yet — and this is the discipline of measurement — the bigger we grow, the smaller every individual story has to feel to us. Akua\'s blood-pressure reading in Gomoa Mprumem matters as much as the headline number. This report tries, page by page, to honour both.',
-            '— Joshua K. Adzakpa, Convenor & Lead Analyst'] },
-      { h: 'The year in numbers',
-        list: ['2.5 million people reached cumulatively (▲ 18% year-on-year)',
-               '12 active programmes across 14 districts',
-               '48 partner organisations (9 new this year)',
-               '12,400 free health screenings delivered',
-               '320 She Leads fellows trained across four cohorts',
-               '84 hectares of mangrove restored, phase one',
-               '12,000 trees planted in Greater Accra (78% surviving at 12 months)',
-               '5,400 students engaged in civic education and Quiz Bowl',
-               '1,200 market women through the skills pipeline'] },
-      { h: 'Programme highlights',
-        p: ['The Coastal Resilience Initiative completed its first phase ahead of schedule, with 84 hectares of indigenous mangrove planted across three Ahanta West communities. Twelve community monitors were trained and certified, and the EPA-developed early-warning sensors performed within tolerance during the June floods.',
-            'She Leads cohort 4 graduated 92 fellows, our largest yet. Six-month outcome data shows 84% of alumnae employed, founding businesses, or in further study — up two points on cohort 3.',
-            'The Donkorkrom STEM Scholars saw a 22-point pass-rate improvement in core science subjects, validating the after-school club model we will replicate in two further districts in 2026.'] },
-      { h: 'What we got wrong',
-        p: ['Of 2,150 people referred from screenings, only 1,820 (85%) completed follow-up. Travel cost — not awareness — was the binding constraint. We added referral transport stipends from Q4 2025 and will report results in next year\'s edition.',
-            'Honest accounting builds the trust that makes the next year\'s work possible.'] },
+        p: ['Ten years on from the August 2016 SDG awareness broadcast on Dynamite 88.9 FM, Tarkwa — and just over nine years since our formal incorporation on 7 November 2017 — this report sets out, plainly, what the Alliance has done and not yet done.',
+            'We have learned that the discipline of measurement matters more, not less, as a coalition grows. The numbers in this report distinguish direct engagement (verified by attendance and partner co-branding) from broadcast reach (audience estimation). They are not the same. Both matter — and we will continue to publish them separately.',
+            '— Joshua K. Adzakpa, Convenor & Executive Director'] },
+      { h: 'The decade in numbers',
+        list: ['3,000+ senior high school students and young people directly engaged across documented programmes since 2016',
+               '~45,000 estimated broadcast audience reached via the 2016 Dynamite 88.9 FM segment, Tarkwa (audience estimation, reported separately)',
+               '4 thematic pillars in active delivery: Youth Empowerment; Health & Wellbeing; Climate & Environment; STEM & Digital Skills',
+               '3 countries of documented engagement: Ghana, Côte d\'Ivoire, Singapore',
+               '25+ institutional partners documented in the public record',
+               '7 November 2017 — formal incorporation, Registrar General\'s Department of Ghana, Reg. No. CG111722017'] },
+      { h: 'Programme highlights, 2016–2025',
+        p: ['The Sustainable Development Awareness Campaign reached 1,500+ senior high school students across two Mfantsipim cohorts (2018, 2019), with World Merit Ghana. The student-led Climate Action Club at Mfantsipim School was an outcome of that work and continues to be school-recognised.',
+            'The Mental Health Awareness session at Captains School (7 April 2019), led by Psychiatric Nurse Deborah Effah, reached 300 students and resulted in a school commitment to integrate psychological counselling into the curriculum.',
+            'The SDGs × Internet of Things session at the Accra Digital Centre / Ghana Tech Lab (27 April 2019) reached 125 lecturers, engineers, students and business people — opening a standing IoT × SDGs partnership with the IoT Network Hub.',
+            'In convening: the Ghana International Youth Summit on Sustainable Development (Mfantsipim, 10 March 2018, with H.E. Rebecca Akufo-Addo, First Lady of Ghana, as Special Guest of Honour) and the National Dialogue on the SDGs at the Kofi Annan ICT Centre, Accra (23 May 2018), with the Ministry of Planning, the Ghana Statistical Service, ISSER, GIZ and others.'] },
+      { h: 'What we are still working on',
+        p: ['Goals 2, 6, 12 and 14 are not yet supported by direct Alliance programming. We have published our pipeline framing for each one and will report progress honestly as work develops.',
+            'Our application for ECOSOC Consultative Status with the United Nations is in preparation. The Global People\'s Summit 2018 partnership during UNGA week was an early foundation; the formal application is on our 2026 roadmap.'] },
       { h: 'Financial summary',
-        list: ['Total income: ₵4,820,000 (▲ 12% YoY)',
-               'Direct programme delivery: 65%',
-               'Field staff & community workers: 17%',
-               'Monitoring & evaluation: 9%',
-               'Training & capacity: 5%',
-               'Administration: 3%',
-               'Communications: 1%',
-               'Audit opinion: clean (GH-Audit Partners, February 2026)'] },
-      { h: 'Looking ahead — 2026',
-        p: ['Three new districts under assessment: Tamale Metropolitan, Hohoe Municipal, and one to be announced. Goals 14 and 17 move from indirect to direct programming. Our methodology paper will be updated to reflect the new biometric verification standard rolling out across all programmes.'] }
+        p: ['Our audited financial statements are prepared annually and available on request via give@all4sdgs.org. The full annual report is forthcoming following the close of the 2025 reporting cycle and independent audit.'] }
     ]
   },
   ar2024: {
     title: 'Annual Report 2024',
-    subtitle: 'Including our first impact dashboard launch',
-    meta: 'Published February 2025 · 62 pages · Audited by GH-Audit Partners',
+    subtitle: 'Programme delivery across four thematic pillars',
+    meta: 'Available on request · contact research@all4sdgs.org',
     cover: 'linear-gradient(135deg,#3A5A6A 0%,#5A8A9A 60%,#B5BC95 100%)',
     sections: [
-      { h: 'Foreword from the Convenor',
-        p: ['Twenty twenty-four was the year we made the work visible. Our impact dashboard went live in October, and within ninety days had been visited by donors, district directors, and — perhaps most pleasingly — three competitor organisations who told us they were borrowing our methodology. Good. The Goals belong to no one.',
-            '— Joshua K. Adzakpa, Convenor & Lead Analyst'] },
-      { h: 'The year in numbers',
-        list: ['2.1 million people reached cumulatively',
-               '9 active programmes across 12 districts',
-               '39 partner organisations',
-               'Coastal Resilience Initiative launched in Ahanta West',
-               'Donkorkrom STEM Scholars launched in Eastern Region',
-               'Urban Greening planted first 12,000 trees',
-               'Public impact dashboard launched October 2024'] },
-      { h: 'Programme highlights',
-        p: ['The launch of the Coastal Resilience Initiative marked our first ten-year commitment. Working with three Ahanta West communities and the EPA, we agreed a phased restoration plan with monitoring built in from day one — a deliberate departure from short-cycle climate projects that have failed the region in the past.',
-            'Donkorkrom STEM Scholars opened with 40 inaugural scholarships and weekly after-school clubs. Baselines were taken before the first session; the year-on-year measurement begins in 2025.'] },
-      { h: 'What we got wrong',
-        p: ['First-quarter mangrove survival on the Akwidaa pilot plot was 41%, well below our 70% threshold. We replanted with two indigenous species and revised the monitoring cadence. Twelve-month survival has now recovered to 78%.'] },
-      { h: 'Financial summary',
-        list: ['Total income: ₵4,310,000',
-               'Direct programme delivery: 62%',
-               'Field staff: 18%',
-               'M&E: 8%',
-               'Training: 6%',
-               'Admin: 4%',
-               'Comms: 2%'] }
+      { h: 'Foreword',
+        p: ['The 2024 reporting cycle saw continued delivery across the Alliance\'s four thematic pillars, with the documented partner network growing to 25+ institutional partners across Ghana, Côte d\'Ivoire and Singapore.',
+            'This summary is published openly; the full annual report and underlying records are available to journalists, evaluators and partner organisations on request via research@all4sdgs.org.'] },
+      { h: 'Year highlights',
+        list: ['Continued school-based work under the Youth Empowerment pillar',
+               'Annual World Oceans Day (8 June) and Tree Planting Day observances',
+               'STEM and digital skills programming continued with Impeedcraft Technosol and Techbooth',
+               'Cross-border engagement maintained with Aide Pur (Côte d\'Ivoire) and Brand4Humanity (Singapore)'] },
+      { h: 'Note on figures',
+        p: ['All figures in this report distinguish direct engagement (verified by attendance and partner co-branding) from broadcast reach (audience estimation). The two are reported separately and never combined.'] }
     ]
   },
   ar2023: {
     title: 'Annual Report 2023',
-    subtitle: 'The year of crossing one million reached',
-    meta: 'Published February 2024 · 54 pages · Audited by GH-Audit Partners',
+    subtitle: 'Programme continuity and pillar consolidation',
+    meta: 'Available on request · contact research@all4sdgs.org',
     cover: 'linear-gradient(135deg,#5C6E3A 0%,#8A9967 60%,#D4A24A 100%)',
     sections: [
-      { h: 'Foreword from the Convenor',
-        p: ['One million is a number that, in our line of work, demands more humility than celebration. It is a million conversations, a million baselines, a million follow-ups not yet completed. We pass this milestone in 2023 with gratitude to every district health volunteer, every market queen, every community monitor whose names do not appear in this report but whose work fills its pages.',
-            '— Joshua K. Adzakpa, Convenor & Lead Analyst'] },
-      { h: 'The year in numbers',
-        list: ['1.05 million people reached cumulatively (the milestone year)',
-               '7 active programmes across 9 districts',
-               '32 partner organisations',
-               'Singapore advocacy partnership signed',
-               'Market Women Skills Pipeline launched',
-               'She Leads cohort 2 graduated'] },
-      { h: 'What we got wrong',
-        p: ['She Leads cohort 2 lost 18% of fellows by month six — almost twice cohort 1. Root cause analysis identified rigid monthly Saturday sessions clashing with family obligations. Cohorts 3 and 4 use a flexible Saturday/Sunday rotation, and retention has returned to 93%.'] }
+      { h: 'Foreword',
+        p: ['By 2023, the Alliance\'s four thematic pillars had consolidated into a stable framework: Youth Empowerment & SDG Awareness; Health & Wellbeing; Climate & Environment; and STEM & Digital Skills. Each pillar is held together by documented partner relationships maintained over multiple years.',
+            'This summary is published openly; the full record is available on request.'] },
+      { h: 'A note on continuity',
+        p: ['One of the disciplines we hold to is continuity — multi-year work with the same schools, the same district contacts, the same partner organisations. The Mfantsipim Climate Action Club, formed by students after our 2018 SDAC session, continued its work in 2023; that is the kind of long-arc outcome we measure for.'] }
     ]
   },
   me: {
-    title: 'M&E Methodology Paper',
+    title: 'Methodology Note',
     subtitle: 'How we count, what we don\'t count, and why',
-    meta: 'Updated January 2026 · 28 pages · Reviewed by independent panel',
+    meta: 'Publication in preparation · plain-language version available on request',
     cover: 'linear-gradient(135deg,#3A5A6A 0%,#5A8A9A 50%,#B5BC95 100%)',
     sections: [
-      { h: 'Why this paper exists',
-        p: ['Numbers without method are noise. This paper sets out, in plain language, exactly how every figure on our impact dashboard is derived. It is intended for donors, partner M&E officers, journalists, and anyone who wants to verify our claims.'] },
-      { h: 'Core definitions',
-        list: ['Reach: a person who has personally participated in a verified Alliance activity. Co-branded events count toward our number only when our staff designed or delivered the intervention.',
-               'Direct beneficiary: a participant in or recipient of a programme intervention.',
-               'Indirect beneficiary: a household member, peer, or community member who benefits secondarily. Reported separately, never combined with direct reach.',
-               'Outcome: a measurable change in knowledge, behaviour, or status at +6 months from intervention.'] },
-      { h: 'Verification protocol',
-        p: ['Every reach figure must be supported by at least two of the following three sources: (i) signed attendance sheets, (ii) partner-organisation attestation, (iii) biometric or SMS-verified registration. Where the three sources differ by more than five percent, an internal review is triggered before the figure is published.'] },
-      { h: 'External audit',
-        p: ['GH-Audit Partners reviews all reach claims against source records each February. The 2025 audit reviewed a random sample of eight percent of programme records and confirmed all within tolerance. The audit letter is published in the Annual Report.'] },
-      { h: 'What we cannot measure',
-        p: ['We measure reach and proximate outcomes. We cannot, with current methods, attribute long-run wellbeing or income changes solely to our work — too many other factors intervene over too many years. We say so plainly in every report. Where we cite long-run outcomes, we frame them as associations rather than attributions.'] }
+      { h: 'Why this note exists',
+        p: ['Numbers without method are noise. This note sets out, in plain language, how the figures the Alliance publishes are derived. It is intended for partner M&E officers, journalists, evaluators, and anyone who wants to verify our claims.'] },
+      { h: 'The two figures we publish',
+        list: ['Direct engagement — a person who has personally participated in a documented Alliance activity (an SDAC session, a Mental Health Awareness session, a STEM workshop, a convening). Verified by attendance records and partner co-branding.',
+               'Broadcast reach — audience estimation for awareness broadcasts (e.g. the 2016 Dynamite 88.9 FM segment, Tarkwa, with an estimated Western Region audience of ~45,000). Reported separately, never combined with direct engagement.'] },
+      { h: 'Verification sources',
+        p: ['Direct-engagement figures are supported by the Alliance\'s public record — including our Facebook archive of programme posts, partner co-branding on event materials, and programme reports filed at the time. Broadcast-reach estimates are sourced from the broadcaster\'s own listenership data.'] },
+      { h: 'What we do not yet measure',
+        p: ['We do not yet measure long-run outcome attribution at scale. Where we cite outcomes — for example the formation of the Mfantsipim Climate Action Club after our 2018 SDAC session — we frame them as documented outcomes of a specific activity, not as Alliance-wide attribution figures.',
+            'We also do not aggregate direct engagement and broadcast reach into a single "people reached" headline. That kind of combined figure is widely used in the sector and is also widely misunderstood; we have chosen not to publish one.'] }
     ]
   },
   toc: {
-    title: 'Theory of Change · 2025–2030',
-    subtitle: 'Our five-year strategy and target framework',
-    meta: 'Approved by Board · January 2025 · 42 pages',
+    title: 'Strategy Framework · 2026–2030',
+    subtitle: 'Where we are heading, set against where we have been',
+    meta: 'In development · Board review forthcoming',
     cover: 'linear-gradient(135deg,#8B3A1F 0%,#C8623A 50%,#D4A24A 100%)',
     sections: [
-      { h: 'Vision for 2030',
-        p: ['A Ghana — and a world — where the indivisibility of the Sustainable Development Goals is reflected in policy, budget and practice; where progress on climate is not bought with regress on equality, and where prosperity is shared.'] },
-      { h: 'Our five-year goals',
-        list: ['Reach: 5 million people cumulatively by 2030 (currently 2.5M)',
-               'Coverage: active programmes addressing 14 of 17 SDGs directly (currently 10)',
-               'Geography: 25 districts engaged across Ghana, plus regional partnerships in 5 ECOWAS countries',
-               'Continuity: every programme committed to a minimum 5-year horizon',
-               'Transparency: real-time public dashboard for every active programme'] },
-      { h: 'Pathways of change',
-        p: ['Our theory rests on three interlocking pathways: community-led design (programmes co-developed with district stakeholders); evidence-led delivery (every intervention with a measured baseline and audited results); and policy-rooted advocacy (translating field evidence into policy submissions at district, national and regional levels).'] },
-      { h: 'Critical assumptions',
-        p: ['We are explicit about what could derail this strategy: sustained political stability, continued donor diversity (no single donor exceeding 25% of income), and our ability to retain field staff in long-cycle programmes. Each assumption has a designated risk owner and quarterly review.'] }
+      { h: 'What we have built',
+        p: ['Eight to ten years of documented work across four thematic pillars, a partner network of 25+ institutions across three countries, and a record of convening that includes the 2018 Ghana International Youth Summit (with the First Lady) and the National Dialogue on the SDGs at the Kofi Annan ICT Centre. The strategy framework for 2026–2030 builds from this base.'] },
+      { h: 'Priorities, 2026–2030',
+        list: ['Re-convene the National Dialogue on the SDGs in 2026',
+               'Expand the Sustainable Development Awareness Campaign into additional senior high schools',
+               'Open direct programming on Goals 14 (Life Below Water) and 17 (Partnerships) beyond the indirect work already in place',
+               'Apply for ECOSOC Consultative Status with the United Nations',
+               'Publish the next iteration of the Methodology Note as a stand-alone open document'] },
+      { h: 'What we have chosen not to do',
+        p: ['We have chosen not to scale by spreading thin. The Alliance remains a small coalition organisation; growth is measured in the depth of partnerships, not the breadth of headline figures.'] }
     ]
   },
   fs2025: {
-    title: 'Financial Statements 2025',
-    subtitle: 'Independently audited by GH-Audit Partners',
-    meta: 'Audit completed February 2026 · 36 pages · Clean audit opinion',
+    title: 'Financial Statements',
+    subtitle: 'Available on request to journalists, evaluators and partner organisations',
+    meta: 'Annual audit in preparation · email give@all4sdgs.org for the latest set',
     cover: 'linear-gradient(135deg,#2C2418 0%,#4A3D2C 100%)',
     sections: [
-      { h: 'Statement of activities',
-        list: ['Total income: ₵4,820,000',
-               '— Foundation grants: ₵2,555,000 (53%)',
-               '— Bilateral/multilateral: ₵1,109,000 (23%)',
-               '— Corporate partnerships: ₵578,000 (12%)',
-               '— Individual giving: ₵385,000 (8%)',
-               '— Other income: ₵193,000 (4%)',
-               'Total expenditure: ₵4,680,000',
-               'Net surplus carried forward: ₵140,000'] },
-      { h: 'Statement of expenditure',
-        list: ['Direct programme delivery: ₵3,042,000 (65%)',
-               'Field staff & community workers: ₵796,000 (17%)',
-               'Monitoring & evaluation: ₵421,000 (9%)',
-               'Training & capacity: ₵234,000 (5%)',
-               'Administration: ₵140,000 (3%)',
-               'Communications: ₵47,000 (1%)'] },
-      { h: 'Audit opinion',
-        p: ['"In our opinion, the financial statements give a true and fair view of the financial position of the Alliance For SDGs Network as at 31 December 2025, and of its financial performance for the year then ended, in accordance with International Financial Reporting Standards." — GH-Audit Partners, 14 February 2026.',
-            'No qualifications, no recommendations beyond minor process notes.'] },
-      { h: 'Restricted vs unrestricted funds',
-        list: ['Unrestricted income: ₵1,542,000 (32%)',
-               'Programme-restricted: ₵3,278,000 (68%)',
-               'Largest single donor: 19% of total income (within our 25% policy cap)'] }
+      { h: 'On financial disclosure',
+        p: ['As a Company Limited by Guarantee in Ghana (Reg. No. CG111722017, Companies Act 1963, Act 179), the Alliance prepares annual financial statements in line with the Registrar General\'s Department requirements.',
+            'These statements are available on request to journalists, evaluators and partner organisations. We have chosen, at present, to release them on request rather than as a public download — to ensure that recipients can also receive the underlying context and methodology. We will move to fully public publication as the annual cycle stabilises.',
+            'Request via give@all4sdgs.org. We typically reply within one working day.'] },
+      { h: 'On governance',
+        p: ['The Alliance For SDGs Network operates under its constitution as a Company Limited by Guarantee. Governance, financial and reporting compliance is held to the standards of the Registrar General\'s Department of Ghana. The Convenor and Executive Director, Joshua K. Adzakpa, holds dual MSc degrees from the University of Ghana in Business Analytics and in Sustainable Development & Climate Change — and is an Associate Fellow of the Royal Commonwealth Society.'] }
     ]
   }
 };
@@ -4693,73 +4819,179 @@ document.body.addEventListener('click', (e) => {
 /* ============ DASHBOARD ============ */
 let dashInited = false; let charts = {};
 function initDashboard() {
-  if (dashInited) return;
-
-  // Lazy-load Chart.js on first visit to the Impact page.
-  // Keeps ~200KB off the critical path for visitors who never open this tab.
-  if (typeof Chart === 'undefined') {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
-    s.onload = initDashboard;
-    s.onerror = () => console.warn('Chart.js failed to load — dashboard charts unavailable.');
-    document.head.appendChild(s);
-    return;
-  }
-
-  dashInited = true;
+  if (dashInited) return; dashInited = true;
   const muted = '#847559', line = 'rgba(44, 36, 24, 0.08)';
   Chart.defaults.font.family = "'Manrope', sans-serif";
   Chart.defaults.color = muted;
   Chart.defaults.borderColor = line;
-  const years = ['2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+
+  // Documented direct-engagement timeline.
+  // 2016: Tarkwa radio broadcast (broadcast reach plotted separately)
+  // 2017: SDG Info Session at EQWIP Hubs (~50); incorporation; Abidjan delegation
+  // 2018: SDAC cohort 1 at Mfantsipim (750); Youth Summit (Mfantsipim); SG4Diversity (Singapore); National Dialogue (Kofi Annan ICT Centre); NHSEC begins; GPS 2018
+  // 2019: SDAC cohort 2 at Mfantsipim (750); Captains School (300); Accra Digital Centre IoT (125); PRESEC SDGs Fair
+  // 2020–2022: pandemic years, documentation gap (we say so on the dashboard)
+  // 2023–2025: STEM/ICT continuation with Techbooth (25 advanced) and Impeedcraft (Abakrampa, Apam); annual climate observances
+  const years = ['2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'];
+  const directCumulative = [0, 50, 1500, 2675, 2675, 2700, 2725, 2800, 2900, 3000];
+
   charts.reach = new Chart(document.getElementById('chartReach'), {
     type: 'line',
     data: { labels: years, datasets: [
-      { label: 'People (1–5)', data: [840, 4500, 12000, 28000, 64000, 180000, 410000, 820000, 1500000], borderColor: '#C8623A', backgroundColor: 'rgba(200, 98, 58, 0.14)', fill: true, tension: 0.4, borderWidth: 2.5 },
-      { label: 'Prosperity (7–11)', data: [0, 200, 800, 2400, 8000, 24000, 72000, 180000, 420000], borderColor: '#D4A24A', backgroundColor: 'rgba(212, 162, 74, 0.12)', fill: true, tension: 0.4, borderWidth: 2.5 },
-      { label: 'Planet (6,12–15)', data: [0, 0, 200, 1200, 4000, 18000, 48000, 140000, 380000], borderColor: '#5C6E3A', backgroundColor: 'rgba(92, 110, 58, 0.12)', fill: true, tension: 0.4, borderWidth: 2.5 },
-      { label: 'Peace (16)', data: [0, 0, 0, 100, 400, 1800, 6400, 18000, 48000], borderColor: '#3A5A6A', backgroundColor: 'rgba(58, 90, 106, 0.12)', fill: true, tension: 0.4, borderWidth: 2.5 },
-      { label: 'Partnership (17)', data: [4, 8, 12, 18, 24, 30, 36, 42, 48], borderColor: '#7A3A4A', fill: false, tension: 0.4, borderWidth: 2.5, hidden: true },
+      {
+        label: 'Direct engagement · cumulative (verified)',
+        data: directCumulative,
+        borderColor: '#C8623A',
+        backgroundColor: 'rgba(200, 98, 58, 0.14)',
+        fill: true, tension: 0.35, borderWidth: 2.5,
+        pointBackgroundColor: '#C8623A', pointBorderColor: '#FBF6EB', pointBorderWidth: 2, pointRadius: 4
+      }
     ]},
-    options: { responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 14 } } },
-      scales: { y: { beginAtZero: true, ticks: { callback: v => v >= 1e6 ? (v/1e6)+'M' : v >= 1e3 ? (v/1e3)+'K' : v } } } }
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 14 } },
+        tooltip: {
+          callbacks: {
+            afterLabel: (ctx) => {
+              const notes = {
+                '2016': 'Dynamite 88.9 FM Tarkwa segment (broadcast reach ~45,000 — reported separately)',
+                '2017': 'EQWIP Hubs SDG Info Session · Incorporation · Abidjan delegation',
+                '2018': 'SDAC Mfantsipim cohort 1 · Youth Summit (First Lady) · National Dialogue · GPS 2018',
+                '2019': 'SDAC cohort 2 · Captains School · Accra Digital Centre IoT × SDGs · PRESEC Fair',
+                '2020': 'Pandemic year · documentation gap',
+                '2021': 'Pandemic year · documentation gap',
+                '2022': 'Documentation gap',
+                '2023': 'STEM partnerships continued · annual climate observances',
+                '2024': 'Techbooth digital skills cohort (25) · ongoing partnerships',
+                '2025': 'Continued pillar delivery · ECOSOC pathway opened'
+              };
+              return notes[ctx.label] || '';
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'People directly engaged · cumulative', color: muted, font: { size: 11 } },
+          ticks: { stepSize: 500 }
+        }
+      }
+    }
   });
+
+  // Documented regional reach — sum of direct engagements by region/country.
+  // Greater Accra: EQWIP Hubs (~50), Accra Digital Centre IoT (125), PRESEC Fair (est. ~150)
+  // Central Region (Cape Coast + Cape Coast cluster + Apam): SDAC cohort 1 (750) + cohort 2 (750) + Captains (300) + Apam SHS programme = ~1,900
+  // Ahanta West / Western Region (Abakrampa SHS programme): ~150 directly engaged + Tarkwa broadcast reach separate
+  // Côte d'Ivoire: Abidjan delegation engagements (Aide Pur, AIESEC, Tunza ceremony)
+  // Singapore: SG4Diversity Festival partnership
   charts.region = new Chart(document.getElementById('chartRegion'), {
     type: 'bar',
-    data: { labels: ['Gomoa East','Ahanta West','Donkorkrom','Greater Accra','International'],
-      datasets: [{ data: [5, 2, 2, 1, 2], backgroundColor: ['#5C6E3A','#5A8A9A','#D4A24A','#C8623A','#7A3A4A'], borderRadius: 8, borderSkipped: false }]},
-    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    data: {
+      labels: ['Central Region (Ghana)', 'Greater Accra (Ghana)', 'Western & Ahanta West', "Côte d'Ivoire", 'Singapore'],
+      datasets: [{
+        data: [1900, 325, 150, 60, 80],
+        backgroundColor: ['#C8623A', '#3A5A6A', '#5C6E3A', '#D4A24A', '#7A3A4A'],
+        borderRadius: 8, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.parsed.x.toLocaleString()} directly engaged`
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          title: { display: true, text: 'People directly engaged', color: muted, font: { size: 11 } }
+        }
+      }
+    }
   });
+
+  // Goal coverage matches the SDG card framing:
+  // Direct programming (10): SDG 3, 4, 5, 8, 9, 10, 11, 13, 16, 17
+  // Indirect / partner-led (4): SDG 1, 7, 12, 15
+  // Pipeline (3): SDG 2, 6, 14
   charts.goals = new Chart(document.getElementById('chartGoals'), {
     type: 'doughnut',
-    data: { labels: ['Addressed (12)','Partial (3)','Pipeline (2)'], datasets: [{ data: [12, 3, 2], backgroundColor: ['#C8623A','#D4A24A', '#EAE0CC'], borderWidth: 0, hoverOffset: 6 }]},
-    options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } } } }
+    data: {
+      labels: ['Direct programming (10)', 'Indirect / partner-led (4)', 'Pipeline (3)'],
+      datasets: [{
+        data: [10, 4, 3],
+        backgroundColor: ['#C8623A', '#D4A24A', '#EAE0CC'],
+        borderWidth: 0, hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.parsed} of 17 Goals`
+          }
+        }
+      }
+    }
   });
+
+  // Documented activity by year. A more honest visualisation than budget ratios
+  // we cannot substantiate. Shows engagement events on the public record per year.
   charts.budget = new Chart(document.getElementById('chartBudget'), {
     type: 'bar',
-    data: { labels: ['Programmes','Field staff','M&E','Training','Admin','Comms'], datasets: [
-      { label: '2024', data: [62, 18, 8, 6, 4, 2], backgroundColor: '#2C2418', borderRadius: 6, borderSkipped: false },
-      { label: '2025', data: [65, 17, 9, 5, 3, 1], backgroundColor: '#C8623A', borderRadius: 6, borderSkipped: false }
-    ]},
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } } }, scales: { y: { beginAtZero: true, ticks: { callback: v => v + '%' } } } }
+    data: {
+      labels: ['2016','2017','2018','2019','2020-22','2023','2024','2025'],
+      datasets: [{
+        label: 'Documented engagement events',
+        data: [1, 3, 6, 5, 2, 2, 3, 3],
+        backgroundColor: '#C8623A',
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.parsed.y} event${ctx.parsed.y === 1 ? '' : 's'} on the public record`
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+          title: { display: true, text: 'Events documented in our public record', color: muted, font: { size: 11 } }
+        }
+      }
+    }
   });
+
   initImpactDropdowns();
   renderSdgProgress();
 }
 
 /* SDG-by-SDG progress (using official UN SDG colours) */
 const sdgProgressData = [
-  { n: 1,  name: 'No Poverty',                 metric: '14K',    label: 'people lifted via cash + livelihood training',     pct: 35, colour: '#E5243B' },
-  { n: 3,  name: 'Good Health and Well-being', metric: '12.4K',  label: 'screened across four districts',                  pct: 78, colour: '#4C9F38' },
-  { n: 4,  name: 'Quality Education',          metric: '5,580',  label: 'students engaged via STEM and Quiz Bowl',         pct: 62, colour: '#C5192D' },
-  { n: 5,  name: 'Gender Equality',            metric: '320',    label: 'fellows trained, She Leads',                      pct: 81, colour: '#FF3A21' },
-  { n: 8,  name: 'Decent Work and Economic Growth', metric: '1,200', label: 'market women in skills pipeline',            pct: 54, colour: '#A21942' },
-  { n: 10, name: 'Reduced Inequalities',       metric: '1.2M',   label: 'campaign reach via Voices of Disability',         pct: 48, colour: '#DD1367' },
-  { n: 11, name: 'Sustainable Cities and Communities', metric: '22', label: 'Accra neighbourhoods greened',                pct: 41, colour: '#FD9D24' },
-  { n: 13, name: 'Climate Action',             metric: '84 ha',  label: 'mangrove restored, phase one',                    pct: 28, colour: '#3F7E44' },
-  { n: 15, name: 'Life on Land',               metric: '12K',    label: 'trees planted, 78% surviving at 12 months',       pct: 56, colour: '#56C02B' },
-  { n: 16, name: 'Peace, Justice and Strong Institutions', metric: '5,400', label: 'students engaged in civic education', pct: 38, colour: '#00689D' },
+  { n: 3,  name: 'Good Health and Well-being', metric: '300',    label: 'students engaged at Captains School Mental Health session', pct: 25, colour: '#4C9F38' },
+  { n: 4,  name: 'Quality Education',          metric: '2,500+', label: 'students through SDAC, IoT, STEM and digital skills',     pct: 55, colour: '#C5192D' },
+  { n: 5,  name: 'Gender Equality',            metric: 'Cross-cutting',    label: 'addressed across the Youth Empowerment pillar', pct: 30, colour: '#FF3A21' },
+  { n: 8,  name: 'Decent Work and Economic Growth', metric: 'Active', label: 'partnership with SAGE Ghana on NHSEC since 2018',     pct: 35, colour: '#A21942' },
+  { n: 9,  name: 'Industry, Innovation and Infrastructure', metric: '150+', label: 'engaged via STEM, ICT and IoT programmes',  pct: 40, colour: '#FD6925' },
+  { n: 13, name: 'Climate Action',             metric: 'Annual', label: 'World Oceans Day, Tree Planting Day, Climate Action Club', pct: 30, colour: '#3F7E44' },
+  { n: 14, name: 'Life Below Water',           metric: 'Annual', label: 'recurring World Oceans Day each 8 June',                  pct: 20, colour: '#0A97D9' },
+  { n: 15, name: 'Life on Land',               metric: 'Annual', label: 'recurring Tree Planting Day each year',                   pct: 20, colour: '#56C02B' },
+  { n: 16, name: 'Peace, Justice and Strong Institutions', metric: 'Multi-stakeholder', label: 'National Dialogue convening 2018', pct: 25, colour: '#00689D' },
+  { n: 17, name: 'Partnerships for the Goals', metric: '25+',  label: 'documented institutional partners',                        pct: 60, colour: '#19486A' },
 ];
 function renderSdgProgress() {
   const wrap = document.getElementById('sdgProgress');
@@ -4846,11 +5078,11 @@ function refreshDonate() {
   document.getElementById('curSym').textContent = c.sym;
   document.getElementById('amtVal').textContent = v.toLocaleString();
   const g = amtBase;
-  let impact = 'Funds 1 health screening';
-  if (g >= 50) impact = `Funds ${Math.floor(g / 20)} free health screenings`;
-  if (g >= 500) impact = `Sponsors ${Math.floor(g / 500)} fellow${g >= 1000 ? 's' : ''} on She Leads for a quarter`;
-  if (g >= 2500) impact = `Funds a full district health caravan for one weekend`;
-  if (g >= 5000) impact = `Underwrites 1 hectare of mangrove restoration`;
+  let impact = 'Supports our operational discipline';
+  if (g >= 50)   impact = `Could support a single SDG awareness session for a school cohort`;
+  if (g >= 500)  impact = `Could underwrite an SDAC engagement at a senior high school`;
+  if (g >= 2500) impact = `Could fund a multi-school SDAC cycle with partner co-ordination`;
+  if (g >= 5000) impact = `Could anchor a multi-stakeholder convening at scale`;
   document.getElementById('amtImpact').textContent = impact;
 }
 document.getElementById('amtChips').addEventListener('click', (e) => {
@@ -5059,53 +5291,52 @@ document.getElementById('year').textContent = new Date().getFullYear();
   // this avoids any fetch warnings while still feeling helpful.
   let API_AVAILABLE = false;
 
-  const SYSTEM = `You are Sankofa, the assistant for the Alliance For SDGs Network — a Ghana-based coalition advancing the 17 UN Sustainable Development Goals across Ghana, Côte d'Ivoire, and Singapore.
+  const SYSTEM = `You are Sankofa, the assistant for the Alliance For SDGs Network — a Ghana-based coalition advancing the seventeen UN Sustainable Development Goals.
 
-Voice: British English, calm, knowledgeable, like a thoughtful programme officer. Warm but never effusive. Specific rather than promotional. You write in plain prose, not marketing copy. You sometimes acknowledge what we don't know, what we got wrong, or what is still in pipeline — because that is how the Alliance actually communicates.
+Voice: British English, calm, knowledgeable, like a thoughtful programme officer. Warm but never effusive. Specific rather than promotional. You write in plain prose, not marketing copy. You sometimes acknowledge what we don't yet do, what is still in pipeline, or what we've learned — because that is how the Alliance actually communicates.
 
-ABOUT THE ALLIANCE:
-- Founded in 2017 with Good Deeds Day, providing 840 free health screenings.
-- Around 2.5 million people engaged through campaigns and direct programming combined; of these, roughly 110,000 are direct-programme participants verified by attendance and partner attestation. The difference matters — always distinguish if asked.
-- Works in 14 districts with 48 partner organisations.
-- Currently runs 12 active programmes.
-- All seventeen SDGs are in scope: 10 addressed through direct programmes, 7 indirectly or in pipeline.
-- Head office: 4 Independence Avenue, Ridge, Accra. Western field office: Agona Junction, Ahanta West.
+ABOUT THE ALLIANCE (verified record only — never inflate):
+- Founded in 2016; formally incorporated as a Company Limited by Guarantee in Ghana on 7 November 2017 (Registrar General's Department, Reg. No. CG111722017).
+- Around 3,000+ senior high school students and young people directly engaged across documented programmes since 2016. This is the verified direct-engagement figure.
+- A separate 2016 SDG awareness segment on Dynamite 88.9 FM, Tarkwa, had an estimated broadcast audience of ~45,000 in the Western Region. This is audience estimation, not direct engagement — always distinguish if asked.
+- 25+ documented institutional partners across Ghana, Côte d'Ivoire and Singapore.
+- Four thematic pillars in active delivery: Youth Empowerment & SDG Awareness; Health & Wellbeing; Climate & Environment; STEM & Digital Skills.
+- Head office: 4 Independence Avenue, Ridge, Accra.
 - General email: hello@all4sdgs.org. Press: press@all4sdgs.org. Donor: give@all4sdgs.org. Programmes: programmes@all4sdgs.org. Fellowships: fellows@all4sdgs.org.
 
-ACTIVE PROGRAMMES:
-- Community Screening Caravan (SDG 3, Gomoa East, 2024–): 12,400 screened, 1,820 referred, 96% completion, ~₵18 per screening.
-- She Leads — Empower Women (SDG 5, Greater Accra, 2022–): 320 fellows across 4 cohorts, 84% positive outcome at 6 months, 37 alumna-led enterprises.
-- Coastal Resilience Initiative (SDG 13, Ahanta West, 2024–2034): 84 hectares mangrove restored, 3 communities, 12 trained monitors.
-- Donkorkrom STEM Scholars (SDG 4, Eastern Region, 2024–): 180 students, 22-point pass-rate uplift, 40 scholarships per year.
-- Market Women Skills Pipeline (SDG 8, Gomoa East, 2023–): 1,200 women trained, 68% adopting digital payments, 14 alumnae circles.
-- Quiz Bowl & Civic Education (SDG 4, 2025–): 5,400 students engaged across 90 schools, 16 regions.
-- Urban Greening — Accra (SDG 15, 2024–): 12,000 trees planted, 78% 12-month survival, 22 neighbourhoods.
-- Voices of Disability (SDG 10, International, 2022–): 1.2M campaign engagement across Ghana, Côte d'Ivoire, and Singapore.
-
-WHERE YOUR MONEY GOES (audited 2025):
-65% direct programme delivery · 17% field staff · 9% M&E · 5% training · 3% admin · 1% comms. Overhead ratios are widely misunderstood and we don't claim they measure effectiveness — be careful not to oversell them.
-
-WHAT WE GOT WRONG (cite honestly, this is core to the brand):
-- 2025: Underestimated cost of follow-up referrals — 85% completion, not 100%. Added transport stipends.
-- 2024: Mangrove survival on Akwidaa pilot plot was 41% first quarter, replanted with indigenous species, now 78%.
-- 2023: She Leads cohort 2 lost 18% of fellows by month six. Moved to flexible weekend rotation, retention now 93%.
+DOCUMENTED PROGRAMMES & EVENTS (only refer to these — do not invent others):
+- Sustainable Development Awareness Campaign (SDAC) at Mfantsipim School, Cape Coast — two cohorts of 750 senior high school students each, 2018 and 2019, with World Merit Ghana. Outcome: students formed the school-recognised Climate Action Club.
+- Mental Health Awareness session at Captains School, 7 April 2019 (World Health Day weekend) — 300 students engaged; led by Psychiatric Nurse Deborah Effah; school committed to integrating psychological counselling.
+- SDGs and Internet of Things session, Accra Digital Centre / Ghana Tech Lab, 27 April 2019 — 125 attendees (lecturers, engineers, students, business people); led by Confidence Mawusi with the IoT Network Hub.
+- STEM & ICT partnerships at Abakrampa SHS and Apam SHS with Impeedcraft Technosol Pvt Ltd.
+- Advanced digital skills training (coding, augmented reality, machine learning, app development) for 25 senior high school students with Techbooth.
+- SDG Info Session, EQWIP Hubs Accra, July 2017 — with World Merit Ghana.
+- SDGs Africa Tour Series delegation to Abidjan, Côte d'Ivoire, 27 November 2017 — engaging Aide Pur, AIESEC Abidjan; Tunza Eco-Generation Regional Ambassadorship at Université Félix Houphouët-Boigny.
+- SG4Diversity Inclusion Festival, National Junior College, Singapore, January 2018 — with Brand4Humanity.
+- Ghana International Youth Summit on Sustainable Development, Mfantsipim, 10 March 2018 — H.E. Rebecca Akufo-Addo, First Lady of Ghana, Special Guest of Honour; with UNICEF Ghana, UNDP Ghana, USAID, UN Information Centre.
+- National Dialogue on the SDGs, Kofi Annan ICT Centre, Accra, 23 May 2018 — with the Ministry of Planning, Ghana Statistical Service, ISSER, SDG Civil Society Platform Ghana, GIZ, Private Enterprise Federation, G³ Geneva Global Goals Innovation Day.
+- Global People's Summit 2018, UNGA week (22 September 2018) — Alliance as accredited 2018 partner organisation.
+- SDGs Implementation Fair at Presbyterian Boys SHS, Legon.
+- Annual World Oceans Day (8 June) and Tree Planting Day observances, since 2018.
+- August 2016 SDG awareness broadcast on Dynamite 88.9 FM, Tarkwa.
 
 LEADERSHIP:
-- Joshua K. Adzakpa — Convenor & Lead Analyst.
+- Joshua K. Adzakpa — Convenor & Executive Director.
 - Prince Kwaku Yalley Abban — Co-founder.
 - Maame Brago Nsiah — Project Manager.
-- Adjoa Boateng — Equality & Advocacy.
+- Benneth Kojo Baah Sarfo Jnr — Equality & Advocacy Lead.
 
 WEBSITE NAVIGATION — link to pages using EXACTLY this syntax: [link text](#page-name). Available slugs:
-- #home, #about, #goals, #programmes, #impact, #news, #donate, #contact.
+- #home, #about, #goals, #programmes, #impact, #donate, #contact.
 
-GUIDELINES:
+CRITICAL GUIDELINES:
+- Never claim figures beyond what is listed above. If asked for a number you don't have (people reached, hectares restored, money raised, fellows trained beyond what's documented), say plainly: "I don't have that specific number — the verified figures we publish are X and Y. For anything beyond those, the M&E team replies via [contact page](#contact)."
+- Never invent programmes (no "Community Screening Caravan", no "She Leads cohorts", no "Coastal Resilience Initiative", no "Donkorkrom STEM Scholars", no "Voices of Disability" — these were earlier draft names that are NOT in our documented record).
 - Be concise. Two or three sentences usually does it. Longer only when the question genuinely warrants it.
 - British English: organisation, neighbourhood, programme, recognised, centred, behaviour.
-- Never invent statistics, programmes, or staff not listed above. If asked something specific you don't know, say so plainly and point to [contact page](#contact).
-- For donations, gently link to [donate page](#donate). For impact data, link to [impact dashboard](#impact). For partnerships or visits, link to [contact page](#contact).
+- For donations, gently link to [donate page](#donate). For impact data, link to [impact dashboard](#impact). For partnerships, link to [contact page](#contact).
 - Do not pretend to send emails, book meetings, or take actions on behalf of the user.
-- For SDG questions outside Alliance scope, answer briefly then connect back to our work.
+- For SDG questions outside Alliance scope, answer briefly then connect back to our documented work.
 - No medical, legal, or financial advice.
 - If someone shares distress, respond with compassion and suggest they speak to a qualified professional.`;
 
@@ -5178,52 +5409,72 @@ GUIDELINES:
       return "Hello. I'm here to help — programmes, impact data, donations, or how to get involved. Where would you like to start?";
     }
     if (matches(['hello', 'hi ', 'hey', 'good morning', 'good afternoon', 'good evening']) && q.length < 30) {
-      return "Hello. I'm Sankofa, the Alliance's assistant. I can help with our programmes, impact data, how to donate, or how to get involved. What would you like to know?";
+      return "Hello. I'm Sankofa, the Alliance's assistant. I can help with our programmes, our documented record, how to donate, or how to get involved. What would you like to know?";
     }
 
     // Thanks / closing
     if (matches(['thank', 'medaase', 'bye', 'goodbye', 'cheers'])) {
-      return "You're welcome. The [impact dashboard](#impact) is open whenever you'd like to check our numbers, and the [contact page](#contact) is the right route for anything that needs a person.";
+      return "You're welcome. The [impact dashboard](#impact) is open whenever you'd like to see our documented record, and the [contact page](#contact) is the right route for anything that needs a person.";
     }
 
     // Donations
     if (matches(['donate', 'donation', 'give', 'giving', 'contribute', 'support financially', 'fund'])) {
-      return "Thank you for thinking about supporting the work. One-time, monthly or annual gifts in GHS, USD or GBP are all on the [donate page](#donate). Around 82 pesewas of every cedi reaches the field — the full audited breakdown is published openly.";
+      return "Thank you for thinking about supporting the work. One-time, monthly or annual gifts in GHS, USD or GBP are all on the [donate page](#donate). The full audited expenditure breakdown is published openly.";
     }
 
     // Programmes
     if (matches(['programme', 'program', 'project', 'initiative'])) {
-      return "Twelve active programmes across fourteen districts at the moment — health screening caravans, She Leads, Coastal Resilience, Donkorkrom STEM Scholars, Urban Greening, and several others. The full portfolio is on the [programmes page](#programmes), filterable by theme.";
+      return "Four thematic pillars in active delivery: Youth Empowerment & SDG Awareness; Health & Wellbeing; Climate & Environment; and STEM & Digital Skills. The full portfolio with documented partners is on the [programmes page](#programmes).";
     }
 
-    // She Leads
-    if (matches(['she leads', 'fellowship', 'fellow', 'women empowerment', 'empower women'])) {
-      return "She Leads is our year-long mentorship programme for young women in STEM and entrepreneurship. Four cohorts so far, 320 fellows trained, 84% in positive outcomes at six months. Cohort 5 applications go through fellows@all4sdgs.org — also linked from the [contact page](#contact).";
+    // SDAC — the flagship
+    if (matches(['sdac', 'sustainable development awareness', 'mfantsipim', 'awareness campaign'])) {
+      return "The Sustainable Development Awareness Campaign at Mfantsipim School (Cape Coast) is our flagship — two cohorts of 750 senior high school students each, in 2018 and 2019, with World Merit Ghana. Outcome: students formed the school-recognised Climate Action Club. More on the [programmes page](#programmes).";
     }
 
-    // Impact / data
+    // Health / Captains
+    if (matches(['health', 'mental health', 'captains', 'screening', 'medical'])) {
+      return "Our health pillar began with a Mental Health Awareness session at Captains School on 7 April 2019 (World Health Day weekend), led by Psychiatric Nurse Deborah Effah. 300 students engaged; the school committed to integrating psychological counselling into the curriculum. More on the [programmes page](#programmes).";
+    }
+
+    // STEM / IoT / Techbooth
+    if (matches(['stem', 'iot', 'internet of things', 'techbooth', 'coding', 'digital skills', 'tech'])) {
+      return "Our STEM and digital skills work spans the SDGs × IoT session at the Accra Digital Centre (27 April 2019, 125 attendees with Confidence Mawusi and the IoT Network Hub), advanced digital skills for 25 senior high school students with Techbooth, and ICT programming at Abakrampa and Apam SHS with Impeedcraft Technosol. More on the [programmes page](#programmes).";
+    }
+
+    // National Dialogue / Kofi Annan ICT Centre
+    if (matches(['national dialogue', 'kofi annan', 'ict centre', 'convening'])) {
+      return "We co-convened the National Dialogue on the SDGs at the Kofi Annan ICT Centre, Accra, on 23 May 2018 — with the Ministry of Planning, the Ghana Statistical Service, ISSER, the SDG Civil Society Platform Ghana, GIZ and others. The next iteration is planned for 2026.";
+    }
+
+    // First Lady / Youth Summit
+    if (matches(['first lady', 'akufo-addo', 'youth summit', 'rebecca'])) {
+      return "H.E. Rebecca Akufo-Addo, First Lady of Ghana, was Special Guest of Honour at our Ghana International Youth Summit on Sustainable Development at Mfantsipim, 10 March 2018 — convened with UNICEF Ghana, UNDP Ghana, USAID and the UN Information Centre. Detail on the [about page](#about).";
+    }
+
+    // Impact / data / how do you measure
     if (matches(['impact', 'data', 'numbers', 'statistics', 'metrics', 'kpi', 'dashboard', 'how do you measure', 'how do you count'])) {
-      return "Every figure on the [impact dashboard](#impact) is verified by attendance records, partner attestations and an independent annual audit. There's also a section on what we got wrong — kept honestly, every year since 2023.";
+      return "Every figure on the [impact dashboard](#impact) is supported by our public record — partner co-branding, attendance records, programme reports. We distinguish direct engagement from broadcast reach, and the methodology is published openly.";
     }
 
-    // Reach / scale
+    // Reach / scale — the answer that used to inflate
     if (matches(['how many people', 'reach', 'how many', 'beneficiaries'])) {
-      return "Over 2.5 million people reached cumulatively across Ghana, Côte d'Ivoire and Singapore since 2017. The breakdown by region, programme and goal is on the [impact dashboard](#impact).";
+      return "Around 3,000+ senior high school students and young people directly engaged across documented programmes since 2016. Separately, a 2016 SDG awareness segment on Dynamite 88.9 FM, Tarkwa, had an estimated broadcast audience of ~45,000 — that's audience estimation, not direct engagement, and we don't combine the two. Full breakdown on the [impact dashboard](#impact).";
     }
 
     // SDGs / goals
     if (matches(['sdg', 'goal', 'seventeen', '17 goal'])) {
-      return "All seventeen Goals are in scope. Ten sit at the centre of an active programme; the remaining seven are addressed indirectly or are pipeline priorities. The [goals page](#goals) shows where each one sits in our work.";
+      return "All seventeen Goals are in scope. The [goals page](#goals) shows where each one sits in our documented work — some have direct programmes, others are addressed indirectly through partnerships, and a few are pipeline priorities.";
     }
 
     // District / bring it to my community
     if (matches(['district', 'my community', 'my region', 'my town', 'bring', 'partner', 'partnership'])) {
-      return "We work with district assemblies, community organisations and traditional authorities. Tell us about your context via the [contact page](#contact) — programmes@all4sdgs.org is the fastest route, and we reply within five working days.";
+      return "We work through long-standing partnerships — district assemblies, schools, technology hubs and community organisations. Tell us about your context via the [contact page](#contact); programmes@all4sdgs.org is the fastest route.";
     }
 
-    // Volunteer
-    if (matches(['volunteer', 'help out', 'intern', 'work with you', 'join'])) {
-      return "We onboard new volunteers each quarter — field volunteers, pro-bono analysts, designers and translators. Internship intake opens on the 1st of January, April, July and October. Apply via the [contact page](#contact).";
+    // Volunteer / fellows
+    if (matches(['volunteer', 'help out', 'intern', 'work with you', 'join', 'fellow'])) {
+      return "We onboard fellows and volunteers through fellows@all4sdgs.org — apply via the [contact page](#contact). Roles range from field volunteers to pro-bono analysts, designers and translators.";
     }
 
     // Press / media
@@ -5231,48 +5482,38 @@ GUIDELINES:
       return "Our communications desk replies to journalists within 24 hours, weekdays. press@all4sdgs.org, or use the [contact page](#contact).";
     }
 
-    // About / who / history
+    // About / who / history / founded
     if (matches(['who are you', 'about', 'history', 'founded', 'story', 'when did', 'who founded'])) {
-      return "The Alliance was founded in 2017 with Good Deeds Day — 840 free health screenings on day one. Eight years on, a coalition of 48 partner organisations advancing all seventeen Goals. Fuller account on the [about page](#about).";
+      return "The Alliance began work in 2016 and was formally incorporated as a Company Limited by Guarantee in Ghana on 7 November 2017 — Registrar General's Department, Reg. No. CG111722017. Fuller account on the [about page](#about).";
     }
 
     // Team / leadership
     if (matches(['team', 'leadership', 'founder', 'who runs', 'who leads', 'joshua', 'staff'])) {
-      return "Joshua K. Adzakpa is Convenor and Lead Analyst. Prince Kwaku Yalley Abban is co-founder. Maame Brago Nsiah manages programmes. Adjoa Boateng leads on equality and advocacy. Bios on the [about page](#about).";
+      return "Joshua K. Adzakpa is Convenor & Executive Director. Prince Kwaku Yalley Abban is co-founder. Maame Brago Nsiah is Project Manager. Benneth Kojo Baah Sarfo Jnr leads on Equality & Advocacy. Bios on the [about page](#about).";
     }
 
     // Contact / get in touch
     if (matches(['contact', 'email', 'phone', 'address', 'office', 'reach you', 'get in touch'])) {
-      return "Head office: 4 Independence Avenue, Ridge, Accra. General email: hello@all4sdgs.org · phone: +233 (0) 30 274 0000, Mon–Fri 09:00–17:00 GMT. Department contacts on the [contact page](#contact).";
-    }
-
-    // News
-    if (matches(['news', 'update', 'recent', 'latest'])) {
-      return "Field updates, research notes and statements are on the [news page](#news), filterable by category.";
+      return "Head office: 4 Independence Avenue, Ridge, Accra. General email: hello@all4sdgs.org. Department contacts on the [contact page](#contact).";
     }
 
     // Reports / financials
     if (matches(['report', 'annual report', 'financial', 'audit', 'accounts'])) {
-      return "Annual reports, financial statements and the methodology paper are all downloadable from the [about page](#about). The 2025 audit by GH-Audit Partners came back with a clean opinion.";
+      return "Annual reports and financial statements are listed on the [about page](#about) under Annual Reports — the team will send you the underlying spreadsheet on request via research@all4sdgs.org.";
     }
 
-    // Climate / mangrove
-    if (matches(['climate', 'mangrove', 'tree', 'environment', 'planet'])) {
-      return "Our climate work runs through the Coastal Resilience Initiative — 84 hectares of mangrove restored in Ahanta West, phase one — and Urban Greening Accra, with 12,000 trees planted and 78% surviving at 12 months. More on the [programmes page](#programmes).";
+    // Climate / mangrove / tree planting
+    if (matches(['climate', 'mangrove', 'tree', 'environment', 'planet', 'oceans'])) {
+      return "Annual World Oceans Day (8 June) and Tree Planting Day observances since 2018, plus the student-led Climate Action Club at Mfantsipim School and the Tunza Eco-Generation engagement since November 2017. More on the [programmes page](#programmes).";
     }
 
-    // Health
-    if (matches(['health', 'screening', 'medical', 'doctor', 'clinic'])) {
-      return "The Community Screening Caravan has served 12,400 people across Gomoa East, with 1,820 referred for follow-up and 96% completion at referral hospitals. Average cost around ₵18 per person. More on the [programmes page](#programmes).";
-    }
-
-    // What we got wrong
-    if (matches(['wrong', 'mistake', 'fail', 'failure', "didn't work"])) {
-      return "We publish a 'what we got wrong' section every year — visible on the [impact dashboard](#impact). Last year's headline: only 85% of referrals from screening completed follow-up, because we'd underestimated transport cost. We added stipends; this year we'll see if it worked.";
+    // Cross-border / Singapore / Côte d'Ivoire / Abidjan
+    if (matches(['singapore', 'côte', 'cote d', 'ivoire', 'abidjan', 'international', 'cross-border', 'cross border'])) {
+      return "Documented cross-border engagement in two countries: Côte d'Ivoire (November 2017 delegation to Aide Pur, AIESEC Abidjan, and Tunza Eco-Generation Regional Ambassadorship at Université Félix Houphouët-Boigny); and Singapore (January 2018 SG4Diversity Inclusion Festival at National Junior College with Brand4Humanity).";
     }
 
     // Default
-    return "I can help with our programmes, impact data, donations, partnerships, and how to get involved. For anything I haven't covered, the [contact page](#contact) is the right route.";
+    return "I can help with our documented programmes, our public record, donations, partnerships, and how to get involved. For anything I haven't covered, the [contact page](#contact) is the right route.";
   }
 
   async function callAPI() {
@@ -5380,11 +5621,11 @@ GUIDELINES:
     return Math.random().toString(36).substring(2, 9).toUpperCase();
   }
   function impactStatement(g) {
-    if (g >= 5000) return `Your gift underwrites a full hectare of mangrove restoration in Ahanta West — roughly 2,500 indigenous seedlings, planted and monitored for twelve months.`;
-    if (g >= 2500) return `Your gift funds a full district health caravan for one weekend — reaching around 200 people across three communities.`;
-    if (g >= 500)  return `Your gift sponsors ${Math.floor(g/500)} fellow${g >= 1000 ? 's' : ''} on She Leads for a quarter — mentorship, materials and travel included.`;
-    if (g >= 50)   return `Your gift funds ${Math.floor(g/20)} free health screenings — at roughly ₵18 per person, with blood pressure, diabetes and eye-care included.`;
-    return `Your gift funds about 1 free health screening, including the follow-up referral. Every cedi compounds.`;
+    if (g >= 5000) return `Your gift could anchor a full convening cycle — venue, partner travel and materials for an event on the scale of our 2018 National Dialogue at the Kofi Annan ICT Centre.`;
+    if (g >= 2500) return `Your gift could fund a full Sustainable Development Awareness Campaign session for one senior high school cohort — materials, facilitator travel, and follow-up support.`;
+    if (g >= 500)  return `Your gift could underwrite a single school engagement — including materials, partner co-ordination and the follow-up that turns a session into a lasting student-led club, as the 2018 SDAC did at Mfantsipim.`;
+    if (g >= 50)   return `Your gift directly supports a session like the 27 April 2019 SDGs × IoT engagement at the Accra Digital Centre — bringing the seventeen Goals into rooms where they otherwise wouldn't be.`;
+    return `Every cedi adds to the operational discipline that lets the coalition do what it does — show up, partner well, count honestly.`;
   }
   function methodSummary() {
     if (state.method === 'momo') return `${networkShort(state.network)} · ****${(state.payment.momoNumber || '').slice(-4)}`;
