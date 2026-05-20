@@ -3648,7 +3648,8 @@
         <button class="custom" data-amt="custom">Other amount</button>
       </div>
       <div class="custom-amount" id="customAmtWrap">
-        <input type="number" id="customAmtInput" min="10" max="100000" step="10" placeholder="Enter amount">
+        <label for="customAmtInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap">Custom donation amount</label>
+        <input type="number" id="customAmtInput" name="customAmount" min="10" max="100000" step="10" placeholder="Enter amount">
       </div>
       <div style="text-align:center; font-size:0.82rem; color:var(--muted); margin-top:0.75rem" id="amtImpact">Funds 25 free health screenings</div>
       <div style="text-align:center; margin-top:1.5rem">
@@ -3983,7 +3984,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="checkout-body" id="coBody"></div>
+    <div class="checkout-body" id="coBody" aria-live="polite"></div>
   </div>
 </div>
 
@@ -5604,19 +5605,19 @@ CRITICAL GUIDELINES:
         <div class="co-row">
           <div class="co-field">
             <label for="d_firstName">First name</label>
-            <input type="text" id="d_firstName" value="${state.donor.firstName}" placeholder="Akua" autocomplete="given-name">
+            <input type="text" id="d_firstName" name="firstName" value="${state.donor.firstName}" placeholder="Akua" autocomplete="given-name">
             <span class="err">Please enter your first name</span>
           </div>
           <div class="co-field">
             <label for="d_lastName">Last name</label>
-            <input type="text" id="d_lastName" value="${state.donor.lastName}" placeholder="Mensah" autocomplete="family-name">
+            <input type="text" id="d_lastName" name="lastName" value="${state.donor.lastName}" placeholder="Mensah" autocomplete="family-name">
             <span class="err">Please enter your last name</span>
           </div>
         </div>
         <div class="co-row single">
           <div class="co-field">
             <label for="d_email">Email address</label>
-            <input type="email" id="d_email" value="${state.donor.email}" placeholder="you@email.com" autocomplete="email">
+            <input type="email" id="d_email" name="donorEmail" value="${state.donor.email}" placeholder="you@email.com" autocomplete="email">
             <span class="hint">Your receipt will be emailed here.</span>
             <span class="err">Please enter a valid email address</span>
           </div>
@@ -5624,12 +5625,12 @@ CRITICAL GUIDELINES:
         <div class="co-row">
           <div class="co-field">
             <label for="d_phone">Phone</label>
-            <input type="tel" id="d_phone" value="${state.donor.phone}" placeholder="+233 24 000 0000" autocomplete="tel">
+            <input type="tel" id="d_phone" name="donorPhone" value="${state.donor.phone}" placeholder="+233 24 000 0000" autocomplete="tel">
             <span class="hint">For mobile money confirmation.</span>
           </div>
           <div class="co-field">
             <label for="d_country">Country</label>
-            <select id="d_country" autocomplete="country-name">
+            <select id="d_country" name="donorCountry" autocomplete="country-name">
               <option ${state.donor.country === 'Ghana' ? 'selected' : ''}>Ghana</option>
               <option ${state.donor.country === 'Nigeria' ? 'selected' : ''}>Nigeria</option>
               <option ${state.donor.country === "Côte d'Ivoire" ? 'selected' : ''}>Côte d'Ivoire</option>
@@ -5713,7 +5714,7 @@ CRITICAL GUIDELINES:
           <div class="co-row single">
             <div class="co-field">
               <label for="p_momoNumber">${networkName(state.network)} number</label>
-              <input type="tel" id="p_momoNumber" placeholder="024 000 0000" value="${state.payment.momoNumber || state.donor.phone || ''}" autocomplete="tel">
+              <input type="tel" id="p_momoNumber" name="momoNumber" placeholder="024 000 0000" value="${state.payment.momoNumber || state.donor.phone || ''}" autocomplete="tel">
               <span class="hint">Make sure this number is registered for ${networkName(state.network)}.</span>
             </div>
           </div>
@@ -5731,27 +5732,27 @@ CRITICAL GUIDELINES:
         <div class="co-row single">
           <div class="co-field">
             <label for="p_cardNumber">Card number</label>
-            <input type="text" id="p_cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" value="${state.payment.cardNumber || ''}">
+            <input type="text" id="p_cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number" value="${state.payment.cardNumber || ''}">
           </div>
         </div>
         <div class="co-row single">
           <div class="co-field">
             <label for="p_cardName">Name on card</label>
-            <input type="text" id="p_cardName" placeholder="As shown on card" autocomplete="cc-name" value="${state.payment.cardName || ''}">
+            <input type="text" id="p_cardName" name="cardName" placeholder="As shown on card" autocomplete="cc-name" value="${state.payment.cardName || ''}">
           </div>
         </div>
         <div class="co-row">
           <div class="co-field">
             <label for="p_cardExpiry">Expiry (MM/YY)</label>
-            <input type="text" id="p_cardExpiry" placeholder="12/27" maxlength="5" autocomplete="cc-exp" value="${state.payment.cardExpiry || ''}">
+            <input type="text" id="p_cardExpiry" name="cardExpiry" placeholder="12/27" maxlength="5" autocomplete="cc-exp" value="${state.payment.cardExpiry || ''}">
           </div>
           <div class="co-field">
             <label for="p_cardCvv">CVV</label>
-            <input type="text" id="p_cardCvv" placeholder="•••" maxlength="4" autocomplete="cc-csc" value="${state.payment.cardCvv || ''}">
+            <input type="text" id="p_cardCvv" name="cardCvv" placeholder="•••" maxlength="4" autocomplete="cc-csc" value="${state.payment.cardCvv || ''}">
           </div>
         </div>
         <label class="co-check">
-          <input type="checkbox" id="p_saveCard" ${state.payment.saveCard ? 'checked' : ''}>
+          <input type="checkbox" id="p_saveCard" name="saveCard" ${state.payment.saveCard ? 'checked' : ''}>
           <span>Save my card securely for future donations (PCI-DSS tokenised, never stored in plaintext).</span>
         </label>`;
     }
@@ -5764,29 +5765,29 @@ CRITICAL GUIDELINES:
         <div class="co-row single">
           <div class="co-field">
             <label for="p_mcNumber">Mastercard number</label>
-            <input type="text" id="p_mcNumber" placeholder="5XXX XXXX XXXX XXXX" maxlength="19" autocomplete="cc-number" value="${state.payment.mcNumber || ''}">
+            <input type="text" id="p_mcNumber" name="mcNumber" placeholder="5XXX XXXX XXXX XXXX" maxlength="19" autocomplete="cc-number" value="${state.payment.mcNumber || ''}">
             <span class="hint">Must begin with 5 (Mastercard) or 2 (Mastercard Series 2).</span>
           </div>
         </div>
         <div class="co-row single">
           <div class="co-field">
             <label for="p_mcName">Name on card</label>
-            <input type="text" id="p_mcName" placeholder="As shown on card" autocomplete="cc-name" value="${state.payment.mcName || ''}">
+            <input type="text" id="p_mcName" name="mcName" placeholder="As shown on card" autocomplete="cc-name" value="${state.payment.mcName || ''}">
           </div>
         </div>
         <div class="co-row">
           <div class="co-field">
             <label for="p_mcExpiry">Expiry (MM/YY)</label>
-            <input type="text" id="p_mcExpiry" placeholder="12/27" maxlength="5" autocomplete="cc-exp" value="${state.payment.mcExpiry || ''}">
+            <input type="text" id="p_mcExpiry" name="mcExpiry" placeholder="12/27" maxlength="5" autocomplete="cc-exp" value="${state.payment.mcExpiry || ''}">
           </div>
           <div class="co-field">
             <label for="p_mcCvc">CVC</label>
-            <input type="text" id="p_mcCvc" placeholder="•••" maxlength="4" autocomplete="cc-csc" value="${state.payment.mcCvc || ''}">
+            <input type="text" id="p_mcCvc" name="mcCvc" placeholder="•••" maxlength="4" autocomplete="cc-csc" value="${state.payment.mcCvc || ''}">
             <span class="hint">3 digits on the back.</span>
           </div>
         </div>
         <label class="co-check">
-          <input type="checkbox" id="p_mcSave" ${state.payment.mcSave ? 'checked' : ''}>
+          <input type="checkbox" id="p_mcSave" name="mcSave" ${state.payment.mcSave ? 'checked' : ''}>
           <span>Save my Mastercard for future gifts (tokenised, never stored in plaintext).</span>
         </label>
         <div class="info-prompt" style="background:linear-gradient(135deg, rgba(235,0,27,0.05), rgba(247,158,27,0.05)); border-color:#EB001B">
@@ -5837,7 +5838,7 @@ CRITICAL GUIDELINES:
         <div class="co-row single">
           <div class="co-field">
             <label for="p_paypalEmail">PayPal email <span style="color:var(--muted); font-weight:400">· optional</span></label>
-            <input type="email" id="p_paypalEmail" placeholder="paypal@email.com" autocomplete="email" value="${state.payment.paypalEmail || state.donor.email || ''}">
+            <input type="email" id="p_paypalEmail" name="paypalEmail" placeholder="paypal@email.com" autocomplete="email" value="${state.payment.paypalEmail || state.donor.email || ''}">
             <span class="hint">If different from your donor email. You can also skip this and log in on the next step.</span>
           </div>
         </div>
