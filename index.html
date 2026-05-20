@@ -2619,7 +2619,7 @@
       <p>One email a month. Programme updates from the field, the data behind our decisions, and ways to get involved.</p>
       <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('input').value=''; alert('Thank you. Look out for our next dispatch.');">
         <label for="nlEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap">Email address for newsletter</label>
-        <input type="email" id="nlEmail" name="email" placeholder="your.email@example.com" required>
+        <input type="email" id="nlEmail" name="email" placeholder="your.email@example.com" required autocomplete="email" aria-label="Email address for newsletter">
         <button type="submit" class="btn">Subscribe</button>
       </form>
     </div>
@@ -3649,7 +3649,7 @@
       </div>
       <div class="custom-amount" id="customAmtWrap">
         <label for="customAmtInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap">Custom donation amount</label>
-        <input type="number" id="customAmtInput" name="customAmount" min="10" max="100000" step="10" placeholder="Enter amount">
+        <input type="number" id="customAmtInput" name="customAmount" min="10" max="100000" step="10" placeholder="Enter amount" autocomplete="off" aria-label="Custom donation amount">
       </div>
       <div style="text-align:center; font-size:0.82rem; color:var(--muted); margin-top:0.75rem" id="amtImpact">Funds 25 free health screenings</div>
       <div style="text-align:center; margin-top:1.5rem">
@@ -3809,15 +3809,15 @@
       <form id="contactForm" onsubmit="event.preventDefault(); alert('Thank you. We will reply within 3 working days.'); this.reset();">
         <div class="form-row">
           <label for="cf_name">Your name</label>
-          <input type="text" id="cf_name" name="name" required placeholder="Akosua Mensah" autocomplete="name">
+          <input type="text" id="cf_name" name="name" required placeholder="Akosua Mensah" autocomplete="name" aria-label="Your name">
         </div>
         <div class="form-row">
           <label for="cf_email">Email</label>
-          <input type="email" id="cf_email" name="email" required placeholder="you@email.com" autocomplete="email">
+          <input type="email" id="cf_email" name="email" required placeholder="you@email.com" autocomplete="email" aria-label="Your email">
         </div>
         <div class="form-row">
           <label for="cf_topic">I'm getting in touch about</label>
-          <select id="cf_topic" name="topic" required>
+          <select id="cf_topic" name="topic" required autocomplete="off" aria-label="Reason for getting in touch">
             <option value="">Select an option…</option>
             <option>Partnership opportunity</option>
             <option>Volunteering or fellowship</option>
@@ -3829,7 +3829,7 @@
         </div>
         <div class="form-row">
           <label for="cf_message">Message</label>
-          <textarea id="cf_message" name="message" required placeholder="Tell us what's on your mind…"></textarea>
+          <textarea id="cf_message" name="message" required placeholder="Tell us what's on your mind…" autocomplete="off" aria-label="Your message"></textarea>
         </div>
         <button type="submit" class="btn lg">Send message</button>
       </form>
