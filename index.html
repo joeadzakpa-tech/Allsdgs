@@ -383,7 +383,8 @@
     margin-bottom: 1.5rem; position: sticky; top: 80px; z-index: 50;
   }
   .dd-wrap { flex: 1; min-width: 180px; }
-  .dd-wrap > label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; font-weight: 600; }
+  .dd-wrap > label,
+  .dd-wrap > .dd-label { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; font-weight: 600; }
   .dd-custom { position: relative; }
   .dd-btn {
     width: 100%; padding: 0.75rem 1rem; border-radius: 12px;
@@ -3142,9 +3143,9 @@
     <!-- Filter dropdowns -->
     <div class="filter-row">
       <div class="dd-wrap">
-        <label>Region</label>
+        <span class="dd-label">Region</span>
         <div class="dd-custom" data-dd="region">
-          <button class="dd-btn">
+          <button class="dd-btn" aria-label="Filter by region">
             <span class="dd-val">All regions</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
@@ -3159,9 +3160,9 @@
         </div>
       </div>
       <div class="dd-wrap">
-        <label>Focus area</label>
+        <span class="dd-label">Focus area</span>
         <div class="dd-custom" data-dd="focus">
-          <button class="dd-btn">
+          <button class="dd-btn" aria-label="Filter by focus area">
             <span class="dd-val">All five Ps</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
@@ -3176,9 +3177,9 @@
         </div>
       </div>
       <div class="dd-wrap">
-        <label>Year</label>
+        <span class="dd-label">Year</span>
         <div class="dd-custom" data-dd="year">
-          <button class="dd-btn">
+          <button class="dd-btn" aria-label="Filter by year">
             <span class="dd-val">All years (2017–2026)</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
@@ -3198,9 +3199,9 @@
         </div>
       </div>
       <div class="dd-wrap">
-        <label>Programme</label>
+        <span class="dd-label">Programme</span>
         <div class="dd-custom" data-dd="programme">
-          <button class="dd-btn">
+          <button class="dd-btn" aria-label="Filter by programme">
             <span class="dd-val">All programmes</span>
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg>
           </button>
