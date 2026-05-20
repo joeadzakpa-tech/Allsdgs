@@ -876,6 +876,7 @@
   .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
   .form-row { margin-bottom: 1rem; }
   .form-row label { display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; }
+  .form-row label[for] { cursor: pointer; }
   .form-row input, .form-row textarea, .form-row select {
     width: 100%; padding: 0.85rem 1rem; border-radius: 12px;
     border: 1px solid var(--line); background: var(--surface);
@@ -2617,7 +2618,8 @@
       <h3 class="serif">Stay close to the work.</h3>
       <p>One email a month. Programme updates from the field, the data behind our decisions, and ways to get involved.</p>
       <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('input').value=''; alert('Thank you. Look out for our next dispatch.');">
-        <input type="email" placeholder="your.email@example.com" required>
+        <label for="nlEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap">Email address for newsletter</label>
+        <input type="email" id="nlEmail" name="email" placeholder="your.email@example.com" required>
         <button type="submit" class="btn">Subscribe</button>
       </form>
     </div>
@@ -3805,16 +3807,16 @@
     <div class="contact-grid">
       <form id="contactForm" onsubmit="event.preventDefault(); alert('Thank you. We will reply within 3 working days.'); this.reset();">
         <div class="form-row">
-          <label>Your name</label>
-          <input type="text" required placeholder="Akosua Mensah">
+          <label for="cf_name">Your name</label>
+          <input type="text" id="cf_name" name="name" required placeholder="Akosua Mensah" autocomplete="name">
         </div>
         <div class="form-row">
-          <label>Email</label>
-          <input type="email" required placeholder="you@email.com">
+          <label for="cf_email">Email</label>
+          <input type="email" id="cf_email" name="email" required placeholder="you@email.com" autocomplete="email">
         </div>
         <div class="form-row">
-          <label>I'm getting in touch about</label>
-          <select required>
+          <label for="cf_topic">I'm getting in touch about</label>
+          <select id="cf_topic" name="topic" required>
             <option value="">Select an option…</option>
             <option>Partnership opportunity</option>
             <option>Volunteering or fellowship</option>
@@ -3825,8 +3827,8 @@
           </select>
         </div>
         <div class="form-row">
-          <label>Message</label>
-          <textarea required placeholder="Tell us what's on your mind…"></textarea>
+          <label for="cf_message">Message</label>
+          <textarea id="cf_message" name="message" required placeholder="Tell us what's on your mind…"></textarea>
         </div>
         <button type="submit" class="btn lg">Send message</button>
       </form>
